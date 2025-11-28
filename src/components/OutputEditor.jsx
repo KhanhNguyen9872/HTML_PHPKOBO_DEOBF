@@ -169,7 +169,7 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
       setBeautyDropdownOpen(false)
       toast.success(t('toast.formatted'))
     } catch (error) {
-      toast.error('Lỗi khi beautify code')
+      toast.error(t('toast.beautifyError'))
       console.error(error)
     }
   }, [outputHtml, beautyHTML, beautyCSS, beautyJS, setOutputHtml, t])
@@ -400,7 +400,7 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
             exit={{ opacity: 0 }}
           >
             <Loader size={28} className="animate-spin text-bw-black dark:text-bw-white" />
-            <span className="text-xs sm:text-sm font-medium text-bw-black dark:text-bw-white">Đang xử lý...</span>
+            <span className="text-xs sm:text-sm font-medium text-bw-black dark:text-bw-white">{t('output.processing')}</span>
           </motion.div>
         )}
       </div>

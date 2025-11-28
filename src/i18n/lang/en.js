@@ -1,4 +1,7 @@
 export default {
+  // Common
+  'common.more': 'More',
+  
   // Header
   'header.title': 'HTML PHPKOBO DEOBF',
   'header.language': 'Language',
@@ -57,6 +60,7 @@ export default {
   'preview.networkToggle': 'Block network requests',
   'preview.networkWarningOn': 'fetch/XHR are blocked to keep pasted code offline.',
   'preview.networkWarningOff': 'HTML can call APIs or leak data when network is allowed.',
+  'preview.networkGuardMessage': 'Network requests are blocked in preview mode.',
   
   // Output section
   'output.title': 'OUTPUT',
@@ -100,5 +104,7 @@ export default {
   'toast.clearOutputConfirm': 'Are you sure you want to clear all OUTPUT content?',
   'toast.clear': 'Clear',
   'toast.cancel': 'Cancel',
+  'toast.beautifyError': 'Unable to beautify code',
+  'output.processing': 'Processing...',
 }
 

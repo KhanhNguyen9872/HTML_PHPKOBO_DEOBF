@@ -352,7 +352,7 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
       setBeautyDropdownOpen(false)
       toast.success(t('toast.formatted'))
     } catch (error) {
-      toast.error('Lỗi khi beautify code')
+      toast.error(t('toast.beautifyError'))
       console.error(error)
     }
   }, [html, beautyHTML, beautyCSS, beautyJS, setHtml, t])

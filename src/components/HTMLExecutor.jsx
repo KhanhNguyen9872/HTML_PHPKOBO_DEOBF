@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
+import { useI18n } from '../i18n/I18nContext'
 
 function HTMLExecutor({ html, reloadKey, viewMode, customWidth, customHeight, onWidthChange, onHeightChange, onLoad, shouldLoad, darkMode, blockNetwork }) {
+  const { t } = useI18n()
   const [iframeContent, setIframeContent] = useState('')
   const [iframeStyle, setIframeStyle] = useState({})
   const [iframeKey, setIframeKey] = useState(0)
@@ -10,6 +12,18 @@ function HTMLExecutor({ html, reloadKey, viewMode, customWidth, customHeight, on
   const containerRef = useRef(null)
   const contentTimeoutRef = useRef(null)
   const helperAttrRef = useRef(`data-preview-helper-${Math.random().toString(36).slice(2, 16)}`)
+
+  const removeHelperNodes = (root) => {
+    if (!root) return
+    try {
+      const helperAttr = helperAttrRef.current
+      root.querySelectorAll(`[${helperAttr}="true"]`).forEach((node) => {
+        node.remove()
+      })
+    } catch (error) {
+      // ignore cleanup errors
+    }
+  }
 
   const stripPreviewHelpers = (htmlString) => {
     if (!htmlString) return htmlString
@@ -35,14 +49,18 @@ function HTMLExecutor({ html, reloadKey, viewMode, customWidth, customHeight, on
     try {
       if (!iframeRef.current || !htmlString) return htmlString
       const iframeWindow = iframeRef.current.contentWindow
-      const removedScripts = iframeWindow?.__removedScripts
-      if (!removedScripts || removedScripts.length <= 2) {
+      const helperAttr = helperAttrRef.current
+      const removedScripts = iframeWindow?.__removedScripts?.filter((script) => {
+        if (!script) return false
+        return !script.includes(`${helperAttr}="true"`)
+      })
+      if (!removedScripts || removedScripts.length <= 1) {
         if (iframeWindow) {
-          iframeWindow.__removedScripts = removedScripts?.slice(0, 2) || []
+          iframeWindow.__removedScripts = removedScripts?.slice(0, 1) || []
         }
         return htmlString
       }
-      const scriptsCombined = removedScripts.slice(2).filter(Boolean).join('\n')
+      const scriptsCombined = removedScripts.slice(1).filter(Boolean).join('\n')
       if (!scriptsCombined.trim()) return htmlString
       if (iframeWindow) {
         iframeWindow.__removedScripts = []
@@ -63,9 +81,11 @@ function HTMLExecutor({ html, reloadKey, viewMode, customWidth, customHeight, on
       if (!doc) return ''
       const clonedDoc = doc.documentElement ? doc.documentElement.cloneNode(true) : null
       if (clonedDoc) {
+        removeHelperNodes(clonedDoc)
         return ensureDoctype(integrateRemovedScripts(stripPreviewHelpers(clonedDoc.outerHTML || '')))
       }
       if (doc.documentElement) {
+        removeHelperNodes(doc.documentElement)
         return ensureDoctype(integrateRemovedScripts(stripPreviewHelpers(doc.documentElement.outerHTML || '')))
       }
       const fallback = doc.body ? doc.body.innerHTML || '' : ''
@@ -123,12 +143,13 @@ function HTMLExecutor({ html, reloadKey, viewMode, customWidth, customHeight, on
           ? 768
           : 'device-width'
     const helperAttr = helperAttrRef.current
+    const networkGuardMessage = JSON.stringify(t('preview.networkGuardMessage'))
     const networkGuardSnippet = blockNetwork ? `
   <script ${helperAttr}="true">
     (function() {
-      const message = 'Network requests bị chặn trong chế độ preview.'
+      const message = ${networkGuardMessage};
       const rejectPromise = () => Promise.reject(new Error(message))
-      const logBlocked = (api) => console.warn('[Preview]', api, 'đã bị chặn.')
+      const logBlocked = (api) => console.warn('[Preview]', api, message)
       
       const blockedFetch = (...args) => {
         logBlocked('fetch')

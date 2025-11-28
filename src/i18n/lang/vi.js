@@ -1,4 +1,7 @@
 export default {
+  // Common
+  'common.more': 'Thêm',
+  
   // Header
   'header.title': 'HTML PHPKOBO DEOBF',
   'header.language': 'Ngôn ngữ',
@@ -57,6 +60,7 @@ export default {
   'preview.networkToggle': 'Chặn yêu cầu mạng',
   'preview.networkWarningOn': 'Đang chặn fetch/XHR để tránh script lạ truy cập Internet.',
   'preview.networkWarningOff': 'Mã HTML có thể gọi API hoặc gửi dữ liệu ra ngoài, hãy cẩn thận!',
+  'preview.networkGuardMessage': 'Yêu cầu mạng bị chặn trong chế độ preview.',
   
   // Output section
   'output.title': 'OUTPUT',
@@ -100,5 +104,7 @@ export default {
   'toast.clearOutputConfirm': 'Bạn có chắc muốn xóa toàn bộ nội dung OUTPUT?',
   'toast.clear': 'Xóa',
   'toast.cancel': 'Hủy',
+  'toast.beautifyError': 'Lỗi khi beautify code',
+  'output.processing': 'Đang xử lý...',
 }
 
