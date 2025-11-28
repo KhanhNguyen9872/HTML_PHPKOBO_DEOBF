@@ -34,6 +34,7 @@ export default {
   'input.beautyCSS': 'Beauty CSS',
   'input.beautyJS': 'Beauty JS',
   'input.beautyButton': 'Beauty',
+  'input.formatting': 'Đang định dạng...',
   'input.history': 'Lịch sử',
   'input.historyTooltip': 'Xem các snapshot gần nhất',
   'input.historyEmpty': 'Chưa có snapshot nào',
@@ -80,6 +81,7 @@ export default {
   'output.beautyCSS': 'Beauty CSS',
   'output.beautyJS': 'Beauty JS',
   'output.beautyButton': 'Beauty',
+  'output.formatting': 'Đang định dạng...',
   
   // Toast messages
   'toast.fileTooLarge': 'File quá lớn! Vui lòng chọn file nhỏ hơn 5MB.',

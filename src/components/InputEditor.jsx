@@ -22,6 +22,7 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
   const [isCompactMenuOpen, setIsCompactMenuOpen] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isBeautifying, setIsBeautifying] = useState(false)
   const [isUrlLoading, setIsUrlLoading] = useState(false)
   const fileInputRef = useRef(null)
   const beautyDropdownRef = useRef(null)
@@ -29,6 +30,8 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
   const compactMenuRef = useRef(null)
   const dragCounter = useRef(0)
   const exampleControllerRef = useRef(null)
+  const pendingInputRef = useRef(html)
+  const inputUpdateTimerRef = useRef(null)
 
   const processFile = useCallback((file) => {
     if (!file) return
@@ -186,6 +189,18 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
   }, [])
 
   useEffect(() => {
+    pendingInputRef.current = html
+  }, [html])
+
+  useEffect(() => {
+    return () => {
+      if (inputUpdateTimerRef.current) {
+        clearTimeout(inputUpdateTimerRef.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
     if (typeof window === 'undefined') return
     const handleViewportCheck = () => {
       setIsCompactToolbar(window.innerWidth < 480)
@@ -284,11 +299,13 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
     return `${size.toFixed(size >= 10 || power === 0 ? 0 : 1)} ${units[power]}`
   }, [])
 
-  const handleBeauty = useCallback(() => {
+  const handleBeauty = useCallback(async () => {
     if (!html || html.trim() === '') {
       toast.error(t('toast.processError'))
       return
     }
+    setIsBeautifying(true)
+    await new Promise((resolve) => setTimeout(resolve, 0))
 
     try {
       let result = html
@@ -366,6 +383,8 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
     } catch (error) {
       toast.error(t('toast.beautifyError'))
       console.error(error)
+    } finally {
+      setIsBeautifying(false)
     }
   }, [html, beautyHTML, beautyCSS, beautyJS, setHtml, t])
 
@@ -543,13 +562,14 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
                       </label>
                       <div className="border-t border-bw-gray-d dark:border-bw-gray-3 pt-2">
                         <motion.button
-                          className="w-full px-3 py-2 bg-bw-black text-bw-white rounded-sm text-sm font-medium"
-                          onClick={handleBeauty}
-                          whileHover={{ backgroundColor: '#333333' }}
-                          whileTap={{ scale: 0.95 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          {t('input.beautyButton')}
+                      className="w-full px-3 py-2 bg-bw-black text-bw-white rounded-sm text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={handleBeauty}
+                      whileHover={!isBeautifying ? { backgroundColor: '#333333' } : {}}
+                      whileTap={!isBeautifying ? { scale: 0.95 } : {}}
+                      transition={{ duration: 0.2 }}
+                      disabled={isBeautifying}
+                    >
+                      {isBeautifying ? t('input.formatting') : t('input.beautyButton')}
                         </motion.button>
                       </div>
                     </div>
@@ -635,8 +655,12 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
     </motion.div>
   )
 
-  const showLoadingOverlay = isExampleLoading || isUrlLoading
-  const loadingOverlayText = isExampleLoading ? t('input.exampleLoading') : t('input.loading')
+  const showLoadingOverlay = isExampleLoading || isUrlLoading || isBeautifying
+  const loadingOverlayText = isBeautifying
+    ? t('input.formatting')
+    : isExampleLoading
+      ? t('input.exampleLoading')
+      : t('input.loading')
   const fullscreenButtonLabel = isFullscreen ? t('editor.exitFullscreen') : t('editor.fullscreen')
   const heightClasses = 'h-[600px] sm:h-[500px] md:h-[400px] lg:h-[500px] xl:h-[600px]'
   const baseContainerClasses = 'flex flex-col border border-bw-gray-d dark:border-bw-gray-3 rounded-sm overflow-hidden bg-bw-white dark:bg-bw-gray-2 shadow-sm transition-all'
@@ -752,7 +776,16 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
           height="100%"
           language="html"
           value={html}
-          onChange={(value) => setHtml(value || '')}
+          onChange={(value) => {
+            pendingInputRef.current = value || ''
+            if (inputUpdateTimerRef.current) {
+              clearTimeout(inputUpdateTimerRef.current)
+            }
+            inputUpdateTimerRef.current = setTimeout(() => {
+              setHtml(pendingInputRef.current)
+              inputUpdateTimerRef.current = null
+            }, 80)
+          }}
           theme={darkMode ? 'vs-dark' : 'vs-light'}
           onMount={(editor) => {
             editorRef.current = editor

@@ -17,8 +17,11 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
   const [beautyCSS, setBeautyCSS] = useState(false)
   const [beautyJS, setBeautyJS] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isBeautifying, setIsBeautifying] = useState(false)
   const beautyDropdownRef = useRef(null)
   const compactMenuRef = useRef(null)
+  const pendingOutputRef = useRef(outputHtml)
+  const outputUpdateTimerRef = useRef(null)
 
   const handleOutputDownload = useCallback(() => {
     const blob = new Blob([outputHtml], { type: 'text/html' })
@@ -92,6 +95,18 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
   }, [isCompactToolbar])
 
   useEffect(() => {
+    pendingOutputRef.current = outputHtml
+  }, [outputHtml])
+
+  useEffect(() => {
+    return () => {
+      if (outputUpdateTimerRef.current) {
+        clearTimeout(outputUpdateTimerRef.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
     if (!isFullscreen) return
     const handleKeydown = (event) => {
       if (event.key === 'Escape') {
@@ -106,11 +121,13 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
     setBeautyDropdownOpen((prev) => !prev)
   }, [])
 
-  const handleBeauty = useCallback(() => {
+  const handleBeauty = useCallback(async () => {
     if (!outputHtml || outputHtml.trim() === '') {
       toast.error(t('toast.processError'))
       return
     }
+    setIsBeautifying(true)
+    await new Promise((resolve) => setTimeout(resolve, 0))
 
     try {
       let result = outputHtml
@@ -183,6 +200,8 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
     } catch (error) {
       toast.error(t('toast.beautifyError'))
       console.error(error)
+    } finally {
+      setIsBeautifying(false)
     }
   }, [outputHtml, beautyHTML, beautyCSS, beautyJS, setOutputHtml, t])
 
@@ -199,7 +218,9 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
   }
 
   const actionDisabled = !outputHtml || isProcessing
-  const effectiveReadOnly = isProcessing || readOnly
+  const effectiveReadOnly = isProcessing || isBeautifying || readOnly
+  const overlayActive = isProcessing || isBeautifying
+  const overlayText = isProcessing ? t('output.processing') : t('output.formatting')
   const fullscreenButtonLabel = isFullscreen ? t('editor.exitFullscreen') : t('editor.fullscreen')
   const heightClasses = 'h-[600px] sm:h-[500px] md:h-[400px] lg:h-[500px] xl:h-[600px]'
   const baseContainerClasses = 'flex flex-col border border-bw-gray-d dark:border-bw-gray-3 rounded-sm overflow-hidden bg-bw-white dark:bg-bw-gray-2 shadow-sm transition-all'
@@ -320,11 +341,12 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
                       {t('output.beautyJS')}
                     </label>
                     <motion.button
-                      className="w-full px-3 py-1.5 bg-bw-black text-bw-white rounded-sm text-sm font-medium hover:bg-bw-gray-7"
+                      className="w-full px-3 py-1.5 bg-bw-black text-bw-white rounded-sm text-sm font-medium hover:bg-bw-gray-7 disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={handleBeauty}
-                      whileTap={{ scale: 0.98 }}
+                      whileTap={!isBeautifying ? { scale: 0.98 } : {}}
+                      disabled={isBeautifying || actionDisabled}
                     >
-                      {t('output.beautyButton')}
+                      {isBeautifying ? t('output.formatting') : t('output.beautyButton')}
                     </motion.button>
                   </div>
                 </motion.div>
@@ -419,7 +441,16 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
           height="100%"
           language="html"
           value={outputHtml}
-          onChange={(value) => setOutputHtml(value || '')}
+          onChange={(value) => {
+            pendingOutputRef.current = value || ''
+            if (outputUpdateTimerRef.current) {
+              clearTimeout(outputUpdateTimerRef.current)
+            }
+            outputUpdateTimerRef.current = setTimeout(() => {
+              setOutputHtml(pendingOutputRef.current)
+              outputUpdateTimerRef.current = null
+            }, 80)
+          }}
           theme={darkMode ? 'vs-dark' : 'vs-light'}
           onMount={(editor) => {
             outputEditorRef.current = editor
@@ -437,7 +468,7 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
             readOnly: effectiveReadOnly,
           }}
         />
-        {isProcessing && (
+        {overlayActive && (
           <motion.div
             className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-bw-white/85 dark:bg-bw-gray-2/80 backdrop-blur-sm"
             initial={{ opacity: 0 }}
@@ -445,7 +476,7 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
             exit={{ opacity: 0 }}
           >
             <Loader size={28} className="animate-spin text-bw-black dark:text-bw-white" />
-            <span className="text-xs sm:text-sm font-medium text-bw-black dark:text-bw-white">{t('output.processing')}</span>
+            <span className="text-xs sm:text-sm font-medium text-bw-black dark:text-bw-white">{overlayText}</span>
           </motion.div>
         )}
       </div>

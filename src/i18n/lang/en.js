@@ -34,6 +34,7 @@ export default {
   'input.beautyCSS': 'Beauty CSS',
   'input.beautyJS': 'Beauty JS',
   'input.beautyButton': 'Beauty',
+  'input.formatting': 'Formatting...',
   'input.history': 'History',
   'input.historyTooltip': 'View recent snapshots',
   'input.historyEmpty': 'No snapshots yet',
@@ -80,6 +81,7 @@ export default {
   'output.beautyCSS': 'Beauty CSS',
   'output.beautyJS': 'Beauty JS',
   'output.beautyButton': 'Beauty',
+  'output.formatting': 'Formatting...',
   
   // Toast messages
   'toast.fileTooLarge': 'File too large! Please select a file smaller than 5MB.',
