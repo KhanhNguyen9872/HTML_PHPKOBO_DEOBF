@@ -113,5 +113,6 @@ export default {
   'toast.cancel': 'Hủy',
   'toast.beautifyError': 'Lỗi khi beautify code',
   'output.processing': 'Đang xử lý...',
+  'output.noData': '// Khong co du lieu tra ve',
 }
 

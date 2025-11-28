@@ -113,5 +113,6 @@ export default {
   'toast.cancel': 'Cancel',
   'toast.beautifyError': 'Unable to beautify code',
   'output.processing': 'Processing...',
+  'output.noData': '// No data returned',
 }
 

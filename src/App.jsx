@@ -47,6 +47,7 @@ function App() {
   const [previewHtml, setPreviewHtml] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [isAutoProcessing, setIsAutoProcessing] = useState(false)
+  const [hasProcessed, setHasProcessed] = useState(false)
   const [previewNonce, setPreviewNonce] = useState(0)
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('dark-mode')
@@ -210,6 +211,7 @@ function App() {
     setOutputHtml('')
     setIsProcessing(true)
     setShowPreview(true)
+    setHasProcessed(true)
     saveSnapshot(html)
 
     if (showToast) {
@@ -291,7 +293,12 @@ function App() {
 
   const handlePreviewLoad = (content) => {
     if (!isProcessing) return
-    setOutputHtml(content || '')
+    // Nếu không có data thì hiển thị message i18n
+    if (!content || content.trim() === '') {
+      setOutputHtml(t('output.noData'))
+    } else {
+      setOutputHtml(content)
+    }
     setIsProcessing(false)
     if (!isAutoProcessing) {
       toast.success(t('toast.processSuccess'))
@@ -456,7 +463,7 @@ function App() {
         />
 
         <AnimatePresence>
-          {(isProcessing || outputHtml) && (
+          {(hasProcessed || isProcessing || outputHtml) && (
             <motion.div
               variants={itemVariants}
               initial={{ opacity: 0, height: 0 }}

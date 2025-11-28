@@ -32,6 +32,7 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
   const exampleControllerRef = useRef(null)
   const pendingInputRef = useRef(html)
   const inputUpdateTimerRef = useRef(null)
+  const hasLoadedExampleRef = useRef(false)
 
   const processFile = useCallback((file) => {
     if (!file) return
@@ -228,21 +229,42 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
   }, [isFullscreen])
 
   useEffect(() => {
-    if (isExampleLoading) return
-    if (html && html.trim()) return
+    // Chỉ check và load example 1 lần duy nhất khi component mount
+    if (hasLoadedExampleRef.current) return
+    
+    // Đánh dấu đã check để không check lại
+    hasLoadedExampleRef.current = true
+    
+    // Check localStorage - chỉ load example nếu localStorage chưa từng được set (null)
+    // hoặc nếu localStorage có giá trị nhưng chỉ là rỗng/whitespace
+    const savedFromStorage = typeof window !== 'undefined' ? localStorage.getItem('html-editor-content') : null
+    const currentHtml = (html ?? '').trim()
+    
+    // Nếu localStorage chưa từng được set (null) hoặc cả localStorage và html prop đều trống
+    const savedTrimmed = savedFromStorage ? savedFromStorage.trim() : ''
+    const shouldLoadExample = savedFromStorage === null || (!savedTrimmed && !currentHtml)
+    
+    if (!shouldLoadExample) {
+      return
+    }
 
+    // Chỉ load example nếu editor trống lúc mount
     const controller = new AbortController()
     exampleControllerRef.current = controller
     setIsExampleLoading(true)
 
     axios.get('/example_phpkobo.html', { signal: controller.signal })
       .then(({ data }) => {
-        if (!data) return
+        if (!data || !data.trim()) {
+          setIsExampleLoading(false)
+          return
+        }
         setHtml(data)
         toast.success(t('toast.exampleLoaded'))
       })
       .catch(error => {
         if (axios.isCancel(error) || error.name === 'CanceledError' || error.name === 'AbortError') return
+        console.error('Failed to load example:', error)
         toast.error(t('toast.exampleError'))
       })
       .finally(() => {
@@ -253,7 +275,8 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
     return () => {
       controller.abort()
     }
-  }, [html, isExampleLoading, setHtml, t])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Chỉ chạy 1 lần khi mount
 
   const handleFormat = useCallback(() => {
     setBeautyDropdownOpen(!beautyDropdownOpen)
