@@ -59,7 +59,7 @@ export default function Preview({
             height: '100%'
           } : {}}
         >
-          <div className="px-3 sm:px-5 py-2 sm:py-3 bg-bw-gray-f dark:bg-bw-gray-3 border-b border-bw-gray-d dark:border-bw-gray-3 text-xs sm:text-sm font-medium text-bw-black dark:text-bw-gray-1 flex flex-col gap-2">
+          <div className="px-3 sm:px-5 py-2 sm:py-3 bg-bw-gray-f dark:bg-bw-gray-3 border-b border-bw-gray-d dark:border-bw-gray-3 text-xs sm:text-sm font-medium text-bw-black dark:text-bw-gray-d flex flex-col gap-2">
             <div className="flex justify-between items-center flex-wrap gap-2">
             <span className="font-bold tracking-wide">{t('preview.title')}</span>
               <motion.div 
@@ -69,10 +69,10 @@ export default function Preview({
                 transition={{ delay: 0.4 }}
               >
               <motion.button
-                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-sm cursor-pointer text-xs font-medium border flex items-center gap-1 sm:gap-1.5 overflow-hidden ${
+                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-sm cursor-pointer text-xs font-medium border flex items-center gap-1 sm:gap-1.5 overflow-hidden transition-colors ${
                   viewMode === 'desktop' 
-                    ? 'bg-bw-black dark:bg-bw-white text-bw-white dark:text-bw-black border-bw-black dark:border-bw-white' 
-                    : 'bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-gray-1 border-bw-gray-d dark:border-bw-gray-3 hover:bg-bw-gray-f dark:hover:bg-bw-gray-2 hover:border-bw-gray-3 dark:hover:border-bw-gray-7'
+                    ? 'bg-bw-black dark:bg-bw-gray-1 text-bw-white dark:text-bw-white border-bw-black dark:border-bw-gray-d' 
+                    : 'bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-gray-d border-bw-gray-d dark:border-bw-gray-3 hover:bg-bw-gray-f dark:hover:bg-bw-gray-2 hover:border-bw-gray-3 dark:hover:border-bw-gray-d dark:hover:text-bw-white'
                 }`}
                 onClick={() => setViewMode('desktop')}
                 title={t('preview.desktopTooltip')}
@@ -97,10 +97,10 @@ export default function Preview({
                 </motion.span>
               </motion.button>
               <motion.button
-                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-sm cursor-pointer text-xs font-medium border flex items-center gap-1 sm:gap-1.5 overflow-hidden ${
+                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-sm cursor-pointer text-xs font-medium border flex items-center gap-1 sm:gap-1.5 overflow-hidden transition-colors ${
                   viewMode === 'tablet' 
-                    ? 'bg-bw-black dark:bg-bw-white text-bw-white dark:text-bw-black border-bw-black dark:border-bw-white' 
-                    : 'bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-gray-1 border-bw-gray-d dark:border-bw-gray-3 hover:bg-bw-gray-f dark:hover:bg-bw-gray-2 hover:border-bw-gray-3 dark:hover:border-bw-gray-7'
+                    ? 'bg-bw-black dark:bg-bw-gray-1 text-bw-white dark:text-bw-white border-bw-black dark:border-bw-gray-d' 
+                    : 'bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-gray-d border-bw-gray-d dark:border-bw-gray-3 hover:bg-bw-gray-f dark:hover:bg-bw-gray-2 hover:border-bw-gray-3 dark:hover:border-bw-gray-d dark:hover:text-bw-white'
                 }`}
                 onClick={() => setViewMode('tablet')}
                 title={t('preview.tabletTooltip')}
@@ -125,10 +125,10 @@ export default function Preview({
                 </motion.span>
               </motion.button>
               <motion.button
-                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-sm cursor-pointer text-xs font-medium border flex items-center gap-1 sm:gap-1.5 overflow-hidden ${
+                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-sm cursor-pointer text-xs font-medium border flex items-center gap-1 sm:gap-1.5 overflow-hidden transition-colors ${
                   viewMode === 'mobile' 
-                    ? 'bg-bw-black dark:bg-bw-white text-bw-white dark:text-bw-black border-bw-black dark:border-bw-white' 
-                    : 'bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-gray-1 border-bw-gray-d dark:border-bw-gray-3 hover:bg-bw-gray-f dark:hover:bg-bw-gray-2 hover:border-bw-gray-3 dark:hover:border-bw-gray-7'
+                    ? 'bg-bw-black dark:bg-bw-gray-1 text-bw-white dark:text-bw-white border-bw-black dark:border-bw-gray-d' 
+                    : 'bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-gray-d border-bw-gray-d dark:border-bw-gray-3 hover:bg-bw-gray-f dark:hover:bg-bw-gray-2 hover:border-bw-gray-3 dark:hover:border-bw-gray-d dark:hover:text-bw-white'
                 }`}
                 onClick={() => setViewMode('mobile')}
                 title={t('preview.mobileTooltip')}
@@ -153,10 +153,10 @@ export default function Preview({
                 </motion.span>
               </motion.button>
               <motion.button
-                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-sm cursor-pointer text-xs font-medium border flex items-center gap-1 sm:gap-1.5 overflow-hidden ${
+                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-sm cursor-pointer text-xs font-medium border flex items-center gap-1 sm:gap-1.5 overflow-hidden transition-colors ${
                   viewMode === 'custom' 
-                    ? 'bg-bw-black dark:bg-bw-white text-bw-white dark:text-bw-black border-bw-black dark:border-bw-white' 
-                    : 'bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-gray-1 border-bw-gray-d dark:border-bw-gray-3 hover:bg-bw-gray-f dark:hover:bg-bw-gray-2 hover:border-bw-gray-3 dark:hover:border-bw-gray-7'
+                    ? 'bg-bw-black dark:bg-bw-gray-1 text-bw-white dark:text-bw-white border-bw-black dark:border-bw-gray-d' 
+                    : 'bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-gray-d border-bw-gray-d dark:border-bw-gray-3 hover:bg-bw-gray-f dark:hover:bg-bw-gray-2 hover:border-bw-gray-3 dark:hover:border-bw-gray-d dark:hover:text-bw-white'
                 }`}
                 onClick={() => setViewMode('custom')}
                 title={t('preview.customTooltip')}
@@ -182,8 +182,8 @@ export default function Preview({
               </motion.button>
               </motion.div>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-[11px] sm:text-xs text-bw-gray-8 dark:text-bw-gray-2">
-              <label className="inline-flex items-center gap-2 font-medium text-bw-black dark:text-bw-gray-1">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-[11px] sm:text-xs text-bw-gray-8 dark:text-bw-gray-d">
+              <label className="inline-flex items-center gap-2 font-medium text-bw-black dark:text-bw-gray-d">
                 <input
                   type="checkbox"
                   checked={blockNetwork}
