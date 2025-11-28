@@ -25,7 +25,7 @@ export default defineConfig({
     enableObfuscation
       ? obfuscatePlugin({
           compact: true,
-          controlFlowFlattening: true,
+          controlFlowFlattening: false,
           deadCodeInjection: true,
           disableConsoleOutput: true,
           identifierNamesGenerator: 'hexadecimal',
