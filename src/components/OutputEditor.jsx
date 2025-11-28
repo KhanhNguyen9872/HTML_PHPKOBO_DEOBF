@@ -2,11 +2,11 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import Editor from '@monaco-editor/react'
-import { Download, Copy, Trash2, Code, Loader, MoreHorizontal } from 'react-feather'
+import { Download, Copy, Trash2, Code, Loader, MoreHorizontal, Maximize2, Minimize2 } from 'react-feather'
 import { useI18n } from '../i18n/I18nContext'
 import { html_beautify, css_beautify, js_beautify } from 'js-beautify'
 
-export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outputEditorRef, darkMode, isProcessing }) {
+export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outputEditorRef, darkMode, isProcessing, readOnly = true, onReadOnlyChange }) {
   const { t } = useI18n()
   const [outputCopySuccess, setOutputCopySuccess] = useState(false)
   const [hoveredButton, setHoveredButton] = useState(null)
@@ -16,6 +16,7 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
   const [beautyHTML, setBeautyHTML] = useState(true)
   const [beautyCSS, setBeautyCSS] = useState(false)
   const [beautyJS, setBeautyJS] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const beautyDropdownRef = useRef(null)
   const compactMenuRef = useRef(null)
 
@@ -89,6 +90,17 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
       setIsCompactMenuOpen(false)
     }
   }, [isCompactToolbar])
+
+  useEffect(() => {
+    if (!isFullscreen) return
+    const handleKeydown = (event) => {
+      if (event.key === 'Escape') {
+        setIsFullscreen(false)
+      }
+    }
+    document.addEventListener('keydown', handleKeydown)
+    return () => document.removeEventListener('keydown', handleKeydown)
+  }, [isFullscreen])
 
   const handleFormat = useCallback(() => {
     setBeautyDropdownOpen((prev) => !prev)
@@ -187,6 +199,12 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
   }
 
   const actionDisabled = !outputHtml || isProcessing
+  const effectiveReadOnly = isProcessing || readOnly
+  const fullscreenButtonLabel = isFullscreen ? t('editor.exitFullscreen') : t('editor.fullscreen')
+  const heightClasses = 'h-[600px] sm:h-[500px] md:h-[400px] lg:h-[500px] xl:h-[600px]'
+  const baseContainerClasses = 'flex flex-col border border-bw-gray-d dark:border-bw-gray-3 rounded-sm overflow-hidden bg-bw-white dark:bg-bw-gray-2 shadow-sm transition-all'
+  const wrapperClasses = isFullscreen ? 'fixed inset-0 z-[60] p-2 sm:p-4 bg-bw-gray-1 dark:bg-bw-gray-1' : 'relative'
+  const containerClass = `${wrapperClasses} ${baseContainerClasses} ${isFullscreen ? 'h-auto min-h-screen' : heightClasses}`
 
   const baseButtonClass = 'px-1.5 sm:px-2.5 py-1.5 bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-white border border-bw-gray-d dark:border-bw-gray-3 rounded-sm cursor-pointer text-xs font-medium flex items-center gap-1 sm:gap-1.5 hover:bg-bw-gray-f dark:hover:bg-bw-gray-2 hover:border-bw-gray-3 dark:hover:border-bw-gray-7 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden'
   const stackedButtonClass = 'w-full justify-between gap-2'
@@ -331,7 +349,7 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
 
   return (
     <motion.div 
-      className="flex flex-col border border-bw-gray-d dark:border-bw-gray-3 rounded-sm overflow-hidden h-[600px] sm:h-[500px] md:h-[400px] lg:h-[500px] xl:h-[600px] bg-bw-white dark:bg-bw-gray-2 shadow-sm"
+      className={containerClass}
       variants={itemVariants}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -341,33 +359,60 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
     >
       <div className="px-3 sm:px-5 py-2 sm:py-3 bg-bw-gray-f dark:bg-bw-gray-3 border-b border-bw-gray-d dark:border-bw-gray-3 text-xs sm:text-sm font-medium text-bw-black dark:text-bw-white flex justify-between items-center flex-wrap gap-2">
         <span className="font-bold tracking-wide">{t('output.title')}</span>
-        {isCompactToolbar ? (
-          <div className="relative" ref={compactMenuRef}>
-            <motion.button
-              className="px-2 py-1.5 bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-white border border-bw-gray-d dark:border-bw-gray-3 rounded-sm cursor-pointer flex items-center gap-1 text-xs font-medium"
-              onClick={() => setIsCompactMenuOpen((prev) => !prev)}
-              whileTap={{ scale: 0.95 }}
-            >
-              <MoreHorizontal size={16} />
-              <span>{t('common.more') || 'More'}</span>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <label
+            className="flex items-center gap-1 sm:gap-1.5 px-2 py-1.5 bg-bw-white dark:bg-bw-gray-3 border border-bw-gray-d dark:border-bw-gray-3 rounded-sm text-xs sm:text-sm font-medium cursor-pointer select-none"
+            title={t('editor.readOnlyTooltip')}
+          >
+            <input
+              type="checkbox"
+              className="w-3.5 h-3.5 accent-bw-black dark:accent-bw-white cursor-pointer"
+              checked={readOnly}
+              onChange={(e) => onReadOnlyChange && onReadOnlyChange(e.target.checked)}
+            />
+            <span>{t('editor.readOnly')}</span>
+          </label>
+          <motion.button
+            className="px-2 py-1.5 bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-white border border-bw-gray-d dark:border-bw-gray-3 rounded-sm cursor-pointer flex items-center gap-1 text-xs font-medium"
+            onClick={() => setIsFullscreen((prev) => !prev)}
+            title={fullscreenButtonLabel}
+            whileTap={{ scale: 0.95 }}
+          >
+            {isFullscreen ? (
+              <Minimize2 size={12} strokeWidth={2} className="sm:w-3.5 sm:h-3.5" />
+            ) : (
+              <Maximize2 size={12} strokeWidth={2} className="sm:w-3.5 sm:h-3.5" />
+            )}
+            <span className="hidden sm:inline">{fullscreenButtonLabel}</span>
           </motion.button>
-            <AnimatePresence>
-              {isCompactMenuOpen && (
-                <motion.div
-                  className="absolute right-0 mt-2 z-50"
-                  initial={{ opacity: 0, y: -6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {renderToolbarActions()}
-        </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        ) : (
-          renderToolbarActions()
-        )}
+          {isCompactToolbar ? (
+            <div className="relative" ref={compactMenuRef}>
+              <motion.button
+                className="px-2 py-1.5 bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-white border border-bw-gray-d dark:border-bw-gray-3 rounded-sm cursor-pointer flex items-center gap-1 text-xs font-medium"
+                onClick={() => setIsCompactMenuOpen((prev) => !prev)}
+                whileTap={{ scale: 0.95 }}
+              >
+                <MoreHorizontal size={16} />
+                <span>{t('common.more')}</span>
+              </motion.button>
+              <AnimatePresence>
+                {isCompactMenuOpen && (
+                  <motion.div
+                    className="absolute right-0 mt-2 z-50"
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {renderToolbarActions()}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            renderToolbarActions()
+          )}
+        </div>
       </div>
       <div className="relative flex-1 overflow-hidden bg-bw-gray-1 dark:bg-bw-gray-1">
         <Editor
@@ -389,7 +434,7 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
             tabSize: 4,
             insertSpaces: true,
             detectIndentation: false,
-            readOnly: isProcessing,
+            readOnly: effectiveReadOnly,
           }}
         />
         {isProcessing && (

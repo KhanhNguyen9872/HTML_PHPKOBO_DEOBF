@@ -1,6 +1,10 @@
 export default {
   // Common
   'common.more': 'Thêm',
+  'editor.fullscreen': 'Toàn màn hình',
+  'editor.exitFullscreen': 'Thoát toàn màn hình',
+  'editor.readOnly': 'Chỉ đọc',
+  'editor.readOnlyTooltip': 'Khóa chỉnh sửa OUTPUT',
   
   // Header
   'header.title': 'HTML PHPKOBO DEOBF',
@@ -40,6 +44,7 @@ export default {
   
   // Process button
   'process.button': 'Xử lý',
+  'process.buttonProcessing': 'Đang xử lý...',
   'process.autoToggle': 'Auto preview',
   'process.autoOn': 'Tự chạy sau khi bạn ngừng gõ',
   'process.autoOff': 'Chỉ chạy khi nhấn nút Xử lý',

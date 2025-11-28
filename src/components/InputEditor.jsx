@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import Editor from '@monaco-editor/react'
 import axios from 'axios'
-import { Upload, Download, Copy, Trash2, Code, AlertCircle, CheckCircle, X, Clock, Loader, XCircle, Link2, Clipboard, MoreHorizontal } from 'react-feather'
+import { Upload, Download, Copy, Trash2, Code, AlertCircle, CheckCircle, X, Clock, Loader, XCircle, Link2, Clipboard, MoreHorizontal, Maximize2, Minimize2 } from 'react-feather'
 import { useI18n } from '../i18n/I18nContext'
 import { html_beautify, css_beautify, js_beautify } from 'js-beautify'
 
@@ -21,6 +21,7 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
   const [isCompactToolbar, setIsCompactToolbar] = useState(false)
   const [isCompactMenuOpen, setIsCompactMenuOpen] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const [isUrlLoading, setIsUrlLoading] = useState(false)
   const fileInputRef = useRef(null)
   const beautyDropdownRef = useRef(null)
@@ -199,6 +200,17 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
       setIsCompactMenuOpen(false)
     }
   }, [isCompactToolbar])
+
+  useEffect(() => {
+    if (!isFullscreen) return
+    const handleKeydown = (event) => {
+      if (event.key === 'Escape') {
+        setIsFullscreen(false)
+      }
+    }
+    document.addEventListener('keydown', handleKeydown)
+    return () => document.removeEventListener('keydown', handleKeydown)
+  }, [isFullscreen])
 
   useEffect(() => {
     if (isExampleLoading) return
@@ -625,10 +637,17 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
 
   const showLoadingOverlay = isExampleLoading || isUrlLoading
   const loadingOverlayText = isExampleLoading ? t('input.exampleLoading') : t('input.loading')
+  const fullscreenButtonLabel = isFullscreen ? t('editor.exitFullscreen') : t('editor.fullscreen')
+  const heightClasses = 'h-[600px] sm:h-[500px] md:h-[400px] lg:h-[500px] xl:h-[600px]'
+  const baseContainerClasses = 'flex flex-col border border-bw-gray-d dark:border-bw-gray-3 rounded-sm overflow-hidden bg-bw-white dark:bg-bw-gray-2 shadow-sm transition-all'
+  const fullscreenWrapperClasses = 'fixed inset-0 z-[60] p-2 sm:p-4 bg-bw-gray-1 dark:bg-bw-gray-1'
+  const normalWrapperClasses = 'relative'
+  const dragHighlightClasses = isDragging ? 'ring-2 ring-bw-black dark:ring-bw-white border-dashed' : ''
+  const containerClass = `${isFullscreen ? fullscreenWrapperClasses : normalWrapperClasses} ${baseContainerClasses} ${isFullscreen ? 'h-auto min-h-screen' : heightClasses} ${dragHighlightClasses}`
 
   return (
     <motion.div 
-      className={`relative flex flex-col border border-bw-gray-d dark:border-bw-gray-3 rounded-sm overflow-hidden h-[600px] sm:h-[500px] md:h-[400px] lg:h-[500px] xl:h-[600px] bg-bw-white dark:bg-bw-gray-2 shadow-sm transition-all ${isDragging ? 'ring-2 ring-bw-black dark:ring-bw-white border-dashed' : ''}`}
+      className={containerClass}
       variants={itemVariants}
       whileHover={{ boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
       transition={{ duration: 0.3 }}
@@ -686,6 +705,19 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
               </motion.span>
             )}
           </AnimatePresence>
+          <motion.button
+            className="px-2 py-1.5 bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-white border border-bw-gray-d dark:border-bw-gray-3 rounded-sm cursor-pointer flex items-center gap-1 text-xs font-medium"
+            onClick={() => setIsFullscreen((prev) => !prev)}
+            title={fullscreenButtonLabel}
+            whileTap={{ scale: 0.95 }}
+          >
+            {isFullscreen ? (
+              <Minimize2 size={12} strokeWidth={2} className="sm:w-3.5 sm:h-3.5" />
+            ) : (
+              <Maximize2 size={12} strokeWidth={2} className="sm:w-3.5 sm:h-3.5" />
+            )}
+            <span className="hidden sm:inline">{fullscreenButtonLabel}</span>
+          </motion.button>
           {isCompactToolbar ? (
             <div className="relative" ref={compactMenuRef}>
               <motion.button
@@ -694,7 +726,7 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
                 whileTap={{ scale: 0.95 }}
               >
                 <MoreHorizontal size={16} />
-                <span>{t('common.more') || 'More'}</span>
+                <span>{t('common.more')}</span>
             </motion.button>
               <AnimatePresence>
                 {isCompactMenuOpen && (

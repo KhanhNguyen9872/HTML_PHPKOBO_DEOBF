@@ -1,6 +1,10 @@
 export default {
   // Common
   'common.more': 'More',
+  'editor.fullscreen': 'Full Screen',
+  'editor.exitFullscreen': 'Exit Full Screen',
+  'editor.readOnly': 'Read only',
+  'editor.readOnlyTooltip': 'Prevent manual edits in OUTPUT',
   
   // Header
   'header.title': 'HTML PHPKOBO DEOBF',
@@ -40,6 +44,7 @@ export default {
   
   // Process button
   'process.button': 'Process',
+  'process.buttonProcessing': 'Processing...',
   'process.autoToggle': 'Auto preview',
   'process.autoOn': 'Runs after you stop typing',
   'process.autoOff': 'Only run when pressing Process',
