@@ -562,7 +562,7 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
               <AnimatePresence>
                 {historyDropdownOpen && (
                   <motion.div
-              className={`absolute ${isCompactToolbar ? 'left-0' : 'right-0'} mt-2 bg-bw-white dark:bg-bw-gray-2 border border-bw-gray-d dark:border-bw-gray-3 rounded-sm shadow-lg min-w-[220px] max-h-[260px] overflow-auto z-50`}
+              className={`absolute ${isCompactToolbar ? 'left-0' : 'right-0'} top-full mt-2 bg-bw-white dark:bg-bw-gray-2 border border-bw-gray-d dark:border-bw-gray-3 rounded-sm shadow-lg min-w-[220px] max-h-[260px] overflow-auto z-50`}
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
