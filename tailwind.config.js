@@ -19,6 +19,8 @@ export default {
         'bw-gray-7': '#777777',
         'bw-gray-d': '#dddddd',
         'bw-gray-f': '#f5f5f5',
+        'bw-warning-200': '#fbbf24',
+        'bw-danger-200': '#f87171',
       },
     },
   },
