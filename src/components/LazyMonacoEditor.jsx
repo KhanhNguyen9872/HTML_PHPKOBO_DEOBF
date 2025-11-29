@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState, useEffect } from 'react'
 import { Loader } from 'react-feather'
+import '../monaco-config'
 
 const Editor = lazy(() => import('@monaco-editor/react'))
 

@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import JavaScriptObfuscator from 'javascript-obfuscator'
+import path from 'path'
 
 const obfuscatePlugin = (options = {}) => ({
   name: 'vite-javascript-obfuscator',
@@ -20,6 +21,11 @@ const obfuscatePlugin = (options = {}) => ({
 const enableObfuscation = process.env.VITE_DISABLE_OBFUSCATION !== 'true'
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      'monaco-editor': path.resolve(__dirname, 'node_modules/monaco-editor')
+    }
+  },
   plugins: [
     react(),
     enableObfuscation
@@ -35,7 +41,7 @@ export default defineConfig({
           log: false, // Tắt log để tăng tốc
           numbersToExpressions: false, // Tắt để tăng tốc
           renameGlobals: false,
-          selfDefending: true, // Tắt để tăng tốc (có thể bật lại nếu cần)
+          selfDefending: false, // Tắt để tăng tốc (có thể bật lại nếu cần)
           simplify: true,
           splitStrings: false, // Tắt để tăng tốc
           splitStringsChunkLength: 0,
@@ -50,7 +56,7 @@ export default defineConfig({
           stringArrayWrappersChainedCalls: false, // Tắt để tăng tốc
           stringArrayWrappersParametersMaxCount: 2,
           stringArrayWrappersType: 'variable',
-          stringArrayThreshold: 0.75, // Giảm threshold để tăng tốc
+          stringArrayThreshold: 0.7, // Giảm threshold để tăng tốc
           target: 'browser',
           transformObjectKeys: false, // Tắt để tăng tốc
           unicodeEscapeSequence: false // Tắt để tăng tốc
@@ -65,7 +71,13 @@ export default defineConfig({
         manualChunks: undefined, // Tắt manual chunks, gom tất cả vào một file
         inlineDynamicImports: true // Gom tất cả dynamic imports vào một chunk
       }
-    }
+    },
+    // Copy Monaco Editor assets vào build output
+    copyPublicDir: true
+  },
+  // Cấu hình để Monaco Editor sử dụng local paths
+  optimizeDeps: {
+    include: ['monaco-editor']
   }
 })
 
