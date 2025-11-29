@@ -55,6 +55,7 @@ export default {
     'process.autoOn': 'يعمل بعد التوقف عن الكتابة',
     'process.autoOff': 'يعمل فقط عند الضغط على "معالجة"',
     'process.autoDelayLabel': 'التأخير: {value}مللي ثانية',
+    'process.notRunYet': 'لم يتم تشغيل المعالجة بعد',
   
     // Preview section
     'preview.title': 'المعاينة',

@@ -55,6 +55,7 @@ export default {
   'process.autoOn': 'Runs after you stop typing',
   'process.autoOff': 'Only run when pressing Process',
   'process.autoDelayLabel': 'Delay: {value}ms',
+  'process.notRunYet': 'Process not run yet',
   
   // Preview section
   'preview.title': 'PREVIEW',

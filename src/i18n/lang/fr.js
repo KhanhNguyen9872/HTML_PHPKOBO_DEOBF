@@ -55,6 +55,7 @@ export default {
     'process.autoOn': 'S\'exécute après une pause de saisie',
     'process.autoOff': 'S\'exécute uniquement en appuyant sur Traiter',
     'process.autoDelayLabel': 'Délai : {value}ms',
+    'process.notRunYet': 'Processus pas encore exécuté',
   
     // Preview section
     'preview.title': 'APERÇU',

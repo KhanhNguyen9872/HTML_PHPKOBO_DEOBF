@@ -55,6 +55,7 @@ export default {
     'process.autoOn': 'टाइपिंग बंद करने के बाद चलता है',
     'process.autoOff': 'केवल प्रक्रिया बटन दबाने पर चले',
     'process.autoDelayLabel': 'विलंब: {value}ms',
+    'process.notRunYet': 'प्रक्रिया अभी तक नहीं चलाई गई',
   
     // Preview section
     'preview.title': 'पूर्वावलोकन',

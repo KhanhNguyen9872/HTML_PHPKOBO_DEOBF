@@ -55,6 +55,7 @@ export default {
     'process.autoOn': '入力停止後に自動実行',
     'process.autoOff': '「処理」を押したときのみ実行',
     'process.autoDelayLabel': '遅延：{value}ms',
+    'process.notRunYet': 'まだ処理が実行されていません',
   
     // Preview section
     'preview.title': 'プレビュー',

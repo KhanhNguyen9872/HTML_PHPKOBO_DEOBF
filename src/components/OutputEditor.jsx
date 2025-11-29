@@ -6,7 +6,7 @@ import { Download, Copy, Trash2, Code, Loader, MoreHorizontal, Maximize2, Minimi
 import { useI18n } from '../i18n/I18nContext'
 import { html_beautify, css_beautify, js_beautify } from 'js-beautify'
 
-export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outputEditorRef, darkMode, isProcessing, readOnly = true, onReadOnlyChange }) {
+export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outputEditorRef, darkMode, isProcessing, readOnly = true, onReadOnlyChange, notRunYet = false }) {
   const { t } = useI18n()
   const [outputCopySuccess, setOutputCopySuccess] = useState(false)
   const [hoveredButton, setHoveredButton] = useState(null)
@@ -410,7 +410,7 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
 
   return (
     <motion.div 
-      className={containerClass}
+      className={`${containerClass} relative`}
       variants={itemVariants}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -418,6 +418,18 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
       whileHover={{ boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
       transition={{ duration: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
     >
+      {notRunYet && (
+        <motion.div
+          className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-bw-white dark:bg-bw-gray-2 z-50"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <span className="text-sm sm:text-base text-bw-gray-7 dark:text-bw-gray-6 font-medium">
+            {t('process.notRunYet')}
+          </span>
+        </motion.div>
+      )}
       <div className="px-3 sm:px-5 py-2 sm:py-3 bg-bw-gray-f dark:bg-bw-gray-3 border-b border-bw-gray-d dark:border-bw-gray-3 text-xs sm:text-sm font-medium text-bw-black dark:text-bw-white flex justify-between items-center flex-wrap gap-2">
         <span className="font-bold tracking-wide">{t('output.title')}</span>
         <div className="flex items-center gap-1 sm:gap-2">

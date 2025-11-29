@@ -55,6 +55,7 @@ export default {
     'process.autoOn': '停止输入后自动运行',
     'process.autoOff': '仅在点击"处理"时运行',
     'process.autoDelayLabel': '延迟：{value}ms',
+    'process.notRunYet': '尚未运行处理',
   
     // Preview section
     'preview.title': '预览',

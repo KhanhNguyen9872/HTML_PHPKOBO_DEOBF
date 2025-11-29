@@ -55,6 +55,7 @@ export default {
   'process.autoOn': 'Tự chạy sau khi bạn ngừng gõ',
   'process.autoOff': 'Chỉ chạy khi nhấn nút Xử lý',
   'process.autoDelayLabel': 'Độ trễ: {value}ms',
+  'process.notRunYet': 'Chưa chạy process',
   
   // Preview section
   'preview.title': 'PREVIEW',

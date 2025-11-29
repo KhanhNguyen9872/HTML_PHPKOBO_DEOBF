@@ -346,7 +346,7 @@ function App() {
         className="flex flex-col flex-1 gap-3 sm:gap-4 p-2 sm:p-4"
         variants={containerVariants}
       >
-        <DelayedSuspense fallback={<PreviewSkeleton />} delay={500}>
+        <DelayedSuspense fallback={<PreviewSkeleton />} delay={800}>
           <InputEditor 
           html={html}
           setHtml={setHtml}
@@ -452,46 +452,37 @@ function App() {
           )}
         </motion.div>
         
-        <AnimatePresence>
-          {(hasProcessed || isProcessing || outputHtml) && (
-            <motion.div
-              variants={itemVariants}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-            >
-              <DelayedSuspense fallback={<PreviewSkeleton />} delay={500}>
-                <OutputEditor
-                  outputHtml={outputHtml}
-                  setOutputHtml={setOutputHtml}
-                  fileName={fileName}
-                  outputEditorRef={outputEditorRef}
-                  darkMode={darkMode}
-                  isProcessing={isProcessing}
-                  readOnly={outputReadOnly}
-                  onReadOnlyChange={setOutputReadOnly}
-                />
-              </DelayedSuspense>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <DelayedSuspense fallback={<PreviewSkeleton />} delay={800}>
+          <OutputEditor
+            outputHtml={outputHtml}
+            setOutputHtml={setOutputHtml}
+            fileName={fileName}
+            outputEditorRef={outputEditorRef}
+            darkMode={darkMode}
+            isProcessing={isProcessing}
+            readOnly={outputReadOnly}
+            onReadOnlyChange={setOutputReadOnly}
+            notRunYet={!hasProcessed && !isProcessing && !outputHtml}
+          />
+        </DelayedSuspense>
 
-        <DelayedSuspense fallback={<PreviewSkeleton />} delay={500}>
+        <DelayedSuspense fallback={<PreviewSkeleton />} delay={800}>
           <Preview
-          html={previewHtml}
-          reloadKey={previewNonce}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          customWidth={customWidth}
-          setCustomWidth={setCustomWidth}
-          customHeight={customHeight}
-          setCustomHeight={setCustomHeight}
-          onLoad={handlePreviewLoad}
-          showPreview={showPreview}
-          darkMode={darkMode}
-          blockNetwork={blockNetwork}
-          setBlockNetwork={setBlockNetwork}
-        />
+            html={previewHtml}
+            reloadKey={previewNonce}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            customWidth={customWidth}
+            setCustomWidth={setCustomWidth}
+            customHeight={customHeight}
+            setCustomHeight={setCustomHeight}
+            onLoad={handlePreviewLoad}
+            showPreview={showPreview}
+            darkMode={darkMode}
+            blockNetwork={blockNetwork}
+            setBlockNetwork={setBlockNetwork}
+            notRunYet={!hasProcessed && !isProcessing && !outputHtml}
+          />
         </DelayedSuspense>
       </motion.div>
     </motion.div>

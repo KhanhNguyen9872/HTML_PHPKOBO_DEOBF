@@ -55,6 +55,7 @@ export default {
     'process.autoOn': 'Corre después de dejar de escribir',
     'process.autoOff': 'Solo se ejecuta cuando presiona Procesar',
     'process.autoDelayLabel': 'Retraso: {value}ms',
+    'process.notRunYet': 'Proceso aún no ejecutado',
   
     // Preview section
     'preview.title': 'VISTA PREVIA',

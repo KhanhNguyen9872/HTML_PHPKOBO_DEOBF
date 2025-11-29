@@ -22,7 +22,8 @@ function Preview({
   showPreview,
   darkMode,
   blockNetwork,
-  setBlockNetwork
+  setBlockNetwork,
+  notRunYet = false
 }) {
   const { t } = useI18n()
   const [hoveredButton, setHoveredButton] = useState(null)
@@ -74,30 +75,39 @@ function Preview({
 
 
   return (
-    <AnimatePresence>
-      {showPreview && (
-        <motion.div 
-          className={`flex flex-col border border-bw-gray-d dark:border-bw-gray-3 rounded-sm bg-bw-white dark:bg-bw-gray-2 shadow-sm ${
-            viewMode === 'desktop' 
-              ? 'flex-1 min-h-0' 
-              : 'flex-1 min-h-[300px] sm:min-h-[400px] md:min-h-[520px] overflow-hidden'
-          }`}
-          variants={itemVariantsMemo}
+    <motion.div 
+      className={`flex flex-col border border-bw-gray-d dark:border-bw-gray-3 rounded-sm bg-bw-white dark:bg-bw-gray-2 shadow-sm relative ${
+        viewMode === 'desktop' 
+          ? 'flex-1 min-h-0' 
+          : 'flex-1 min-h-[300px] sm:min-h-[400px] md:min-h-[520px] overflow-hidden'
+      }`}
+      variants={itemVariantsMemo}
+      initial={{ opacity: 0 }}
+      animate={{ 
+        opacity: 1
+      }}
+      whileHover={{ boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
+      transition={{ duration: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
+      style={viewMode === 'desktop' ? { 
+        display: 'flex', 
+        flexDirection: 'column',
+        flex: '1 1 0%',
+        minHeight: 0,
+        height: '100%'
+      } : {}}
+    >
+      {notRunYet && (
+        <motion.div
+          className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-bw-white dark:bg-bw-gray-2 z-50"
           initial={{ opacity: 0 }}
-          animate={{ 
-            opacity: 1
-          }}
+          animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          whileHover={{ boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
-          transition={{ duration: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
-          style={viewMode === 'desktop' ? { 
-            display: 'flex', 
-            flexDirection: 'column',
-            flex: '1 1 0%',
-            minHeight: 0,
-            height: '100%'
-          } : {}}
         >
+          <span className="text-sm sm:text-base text-bw-gray-7 dark:text-bw-gray-6 font-medium">
+            {t('process.notRunYet')}
+          </span>
+        </motion.div>
+      )}
           <div className="px-3 sm:px-5 py-2 sm:py-3 bg-bw-gray-f dark:bg-bw-gray-3 border-b border-bw-gray-d dark:border-bw-gray-3 text-xs sm:text-sm font-medium text-bw-black dark:text-bw-gray-d flex flex-col gap-2">
             <div className="flex justify-between items-center flex-wrap gap-2">
             <span className="font-bold tracking-wide">{t('preview.title')}</span>
@@ -371,9 +381,7 @@ function Preview({
             blockNetwork={blockNetwork}
             zoomLevel={zoomLevel}
           />
-        </motion.div>
-      )}
-    </AnimatePresence>
+    </motion.div>
   )
 }
 

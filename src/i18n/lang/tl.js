@@ -55,6 +55,7 @@ export default {
     'process.autoOn': 'Tatakbo pagkatapos mong tumigil sa pag-type',
     'process.autoOff': 'Tatakbo lamang kapag pinindot ang Proseso',
     'process.autoDelayLabel': 'Delay: {value}ms',
+    'process.notRunYet': 'Hindi pa na-run ang proseso',
   
     // Preview section
     'preview.title': 'PREVIEW',

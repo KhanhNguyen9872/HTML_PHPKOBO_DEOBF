@@ -55,6 +55,7 @@ export default {
     'process.autoOn': 'Berjalan setelah berhenti mengetik',
     'process.autoOff': 'Berjalan hanya saat klik "Proses"',
     'process.autoDelayLabel': 'Delay: {value}ms',
+    'process.notRunYet': 'Proses belum dijalankan',
   
     // Preview section
     'preview.title': 'Pratinjau',

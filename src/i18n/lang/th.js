@@ -55,6 +55,7 @@ export default {
     'process.autoOn': 'ทำงานหลังจากหยุดพิมพ์',
     'process.autoOff': 'ทำงานเฉพาะเมื่อกดประมวลผล',
     'process.autoDelayLabel': 'หน่วงเวลา: {value}มิลลิวินาที',
+    'process.notRunYet': 'ยังไม่ได้รัน process',
   
     // Preview section
     'preview.title': 'ตัวอย่าง',
