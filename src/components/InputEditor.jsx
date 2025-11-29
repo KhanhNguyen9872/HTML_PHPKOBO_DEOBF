@@ -1,7 +1,8 @@
-import { useRef, useState, useCallback, useEffect } from 'react'
+import { useRef, useState, useCallback, useEffect, useMemo, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
-import Editor from '@monaco-editor/react'
+import LazyMonacoEditor from './LazyMonacoEditor'
+import VirtualizedList from './VirtualizedList'
 import axios from 'axios'
 import { Upload, Download, Copy, Trash2, Code, AlertCircle, CheckCircle, X, Clock, Loader, XCircle, Link2, Clipboard, MoreHorizontal, Maximize2, Minimize2 } from 'react-feather'
 import { useI18n } from '../i18n/I18nContext'
@@ -421,6 +422,33 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
     return `${size.toFixed(size >= 10 || power === 0 ? 0 : 1)} ${units[power]}`
   }, [])
 
+  const editorOptions = useMemo(() => ({
+    minimap: { enabled: false },
+    fontSize: 14,
+    wordWrap: 'on',
+    automaticLayout: true,
+    formatOnPaste: true,
+    formatOnType: true,
+    tabSize: 4,
+    insertSpaces: true,
+    detectIndentation: false,
+  }), [])
+
+  const handleEditorChange = useCallback((value) => {
+    pendingInputRef.current = value || ''
+    if (inputUpdateTimerRef.current) {
+      clearTimeout(inputUpdateTimerRef.current)
+    }
+    inputUpdateTimerRef.current = setTimeout(() => {
+      setHtml(pendingInputRef.current)
+      inputUpdateTimerRef.current = null
+    }, 80)
+  }, [setHtml])
+
+  const handleEditorMount = useCallback((editor) => {
+    editorRef.current = editor
+  }, [])
+
   const handleBeauty = useCallback(async () => {
     if (!html || html.trim() === '') {
       toast.error(t('toast.processError'))
@@ -549,7 +577,7 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
           <motion.div 
       className={`${isCompactToolbar
         ? 'flex flex-col gap-2 w-60 p-3 bg-bw-white dark:bg-bw-gray-2 border border-bw-gray-d dark:border-bw-gray-3 rounded-md shadow-lg'
-        : 'flex items-center gap-1 sm:gap-1.5 border-l border-bw-gray-d dark:border-bw-gray-3 pl-1 sm:pl-2 ml-1 sm:ml-2'
+        : 'flex items-center gap-1 sm:gap-1.5 border-l border-bw-gray-d dark:border-bw-gray-7 pl-1 sm:pl-2 ml-1 sm:ml-2'
       }`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -562,7 +590,10 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
               onChange={handleFileSelect}
               className="hidden"
             />
-            <motion.button 
+            
+            {/* Nhóm Load */}
+            <div className={`flex ${isCompactToolbar ? 'flex-col gap-2' : 'items-center gap-1 sm:gap-1.5'} ${isCompactToolbar ? '' : 'pr-1 sm:pr-2 border-r border-bw-gray-d dark:border-bw-gray-7'}`}>
+              <motion.button 
         className={`${baseButtonClass} ${isCompactToolbar ? stackedButtonClass : ''}`}
               onClick={() => fileInputRef.current?.click()}
               title={t('input.selectFile')}
@@ -600,6 +631,10 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
           {renderButtonLabel('clipboard', t('input.loadClipboard'))}
               </motion.button>
             )}
+            </div>
+
+            {/* Nhóm Export */}
+            <div className={`flex ${isCompactToolbar ? 'flex-col gap-2' : 'items-center gap-1 sm:gap-1.5'} ${isCompactToolbar ? '' : 'pr-1 sm:pr-2 border-r border-bw-gray-d dark:border-bw-gray-7'}`}>
             <motion.button 
         className={`${baseButtonClass} ${isCompactToolbar ? stackedButtonClass : ''}`}
               onClick={handleDownload}
@@ -629,6 +664,10 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
               <Copy size={12} strokeWidth={2} className="sm:w-3.5 sm:h-3.5 flex-shrink-0" />
         {renderButtonLabel('copy', t('input.copy'))}
             </motion.button>
+            </div>
+
+            {/* Nhóm Format */}
+            <div className={`flex ${isCompactToolbar ? 'flex-col gap-2' : 'items-center gap-1 sm:gap-1.5'} ${isCompactToolbar ? '' : 'pr-1 sm:pr-2 border-r border-bw-gray-d dark:border-bw-gray-7'}`}>
       <div className={`relative ${isCompactToolbar ? 'w-full' : ''}`} ref={beautyDropdownRef}>
               <motion.button 
           className={`${baseButtonClass} ${isCompactToolbar ? stackedButtonClass : ''}`}
@@ -697,6 +736,10 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
                 )}
               </AnimatePresence>
             </div>
+            </div>
+
+            {/* Nhóm History */}
+            <div className={`flex ${isCompactToolbar ? 'flex-col gap-2' : 'items-center gap-1 sm:gap-1.5'} ${isCompactToolbar ? '' : 'pr-1 sm:pr-2 border-r border-bw-gray-d dark:border-bw-gray-7'}`}>
       <div className={`relative flex items-center gap-2 ${isCompactToolbar ? 'w-full flex-col items-stretch' : ''}`} ref={historyDropdownRef}>
               <motion.button 
           className={`${baseButtonClass} ${isCompactToolbar ? stackedButtonClass : ''}`}
@@ -714,44 +757,43 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
               <AnimatePresence>
                 {historyDropdownOpen && (
                   <motion.div
-              className={`absolute ${isCompactToolbar ? 'left-0' : 'right-0'} top-full mt-2 bg-bw-white dark:bg-bw-gray-2 border border-bw-gray-d dark:border-bw-gray-3 rounded-sm shadow-lg min-w-[220px] max-h-[260px] overflow-auto z-50`}
+              className={`absolute ${isCompactToolbar ? 'left-0' : 'right-0'} top-full mt-2 bg-bw-white dark:bg-bw-gray-2 border border-bw-gray-d dark:border-bw-gray-3 rounded-sm shadow-lg min-w-[440px] z-50 overflow-hidden`}
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
                   >
-                    {snapshots.length === 0 ? (
-                      <p className="px-4 py-3 text-xs text-bw-gray-7 dark:text-bw-gray-6">
-                        {t('input.historyEmpty')}
-                      </p>
-                    ) : (
-                      <ul className="divide-y divide-bw-gray-d dark:divide-bw-gray-3">
-                        {snapshots.map((snapshot) => (
-                          <li key={snapshot.id}>
-                            <div className="flex items-start gap-2 px-4 py-2 hover:bg-bw-gray-f dark:hover:bg-bw-gray-3 transition-colors">
-                              <button
-                                className="flex-1 text-left"
-                                onClick={() => handleSnapshotSelect(snapshot)}
-                              >
-                                <p className="text-[11px] font-semibold text-bw-black dark:text-bw-white">
-                                  {formatSnapshotTime(snapshot.timestamp)}
-                                </p>
-                                <p className="text-[10px] text-bw-gray-7 dark:text-bw-gray-6 truncate">
-                                  {(snapshot.content || '').replace(/\s+/g, ' ').slice(0, 80)}
-                                </p>
-                              </button>
-                              <button
-                                className="text-bw-gray-6 hover:text-bw-black dark:text-bw-gray-5 dark:hover:text-bw-white transition-colors"
-                                title={t('input.historyDelete')}
-                                onClick={() => handleSnapshotDelete(snapshot.id)}
-                              >
-                                <XCircle size={14} strokeWidth={2} />
-                              </button>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                    <VirtualizedList
+                      items={snapshots}
+                      emptyMessage={t('input.historyEmpty')}
+                      className="bg-bw-white dark:bg-bw-gray-2"
+                      maxHeight={260}
+                      renderItem={(snapshot) => (
+                        <div className="flex items-center justify-between gap-2 px-4 py-2 hover:bg-bw-gray-f dark:hover:bg-bw-gray-3 transition-colors border-b border-bw-gray-d dark:border-bw-gray-3">
+                          <button
+                            className="flex-1 text-left min-w-0"
+                            onClick={() => handleSnapshotSelect(snapshot)}
+                          >
+                            <p className="text-[11px] font-semibold text-bw-black dark:text-bw-white">
+                              {formatSnapshotTime(snapshot.timestamp)}
+                            </p>
+                            <p className="text-[10px] text-bw-gray-7 dark:text-bw-gray-6 truncate">
+                              {(snapshot.content || '').replace(/\s+/g, ' ').slice(0, 160)}
+                            </p>
+                          </button>
+                          <button
+                            className="text-bw-gray-6 hover:text-bw-black dark:text-bw-gray-5 dark:hover:text-bw-white transition-colors flex-shrink-0 ml-auto"
+                            title={t('input.historyDelete')}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleSnapshotDelete(snapshot.id)
+                            }}
+                          >
+                            <XCircle size={14} strokeWidth={2} />
+                          </button>
+                        </div>
+                      )}
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -759,6 +801,10 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
                 {t('input.historySize', { value: formatSnapshotSize(snapshotsSize) })}
               </span>
             </div>
+            </div>
+
+            {/* Nhóm Clear */}
+            <div className={`flex ${isCompactToolbar ? 'flex-col gap-2' : 'items-center gap-1 sm:gap-1.5'}`}>
             <motion.button 
         className={`${baseButtonClass} ${isCompactToolbar ? stackedButtonClass : ''}`}
               onClick={handleClear}
@@ -772,6 +818,7 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
               <Trash2 size={12} strokeWidth={2} className="sm:w-3.5 sm:h-3.5 flex-shrink-0" />
         {renderButtonLabel('clear', t('input.clear'))}
       </motion.button>
+            </div>
     </motion.div>
   )
 
@@ -892,35 +939,15 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
         </div>
       </div>
       <div className="relative flex-1 overflow-hidden bg-bw-gray-1 dark:bg-bw-gray-1">
-        <Editor
+        <LazyMonacoEditor
+          shouldLoad={true}
           height="100%"
           language="html"
           value={html}
-          onChange={(value) => {
-            pendingInputRef.current = value || ''
-            if (inputUpdateTimerRef.current) {
-              clearTimeout(inputUpdateTimerRef.current)
-            }
-            inputUpdateTimerRef.current = setTimeout(() => {
-              setHtml(pendingInputRef.current)
-              inputUpdateTimerRef.current = null
-            }, 80)
-          }}
+          onChange={handleEditorChange}
           theme={darkMode ? 'vs-dark' : 'vs-light'}
-          onMount={(editor) => {
-            editorRef.current = editor
-          }}
-          options={{
-            minimap: { enabled: false },
-            fontSize: 14,
-            wordWrap: 'on',
-            automaticLayout: true,
-            formatOnPaste: true,
-            formatOnType: true,
-            tabSize: 4,
-            insertSpaces: true,
-            detectIndentation: false,
-          }}
+          onMount={handleEditorMount}
+          options={editorOptions}
         />
         {showLoadingOverlay && (
           <motion.div

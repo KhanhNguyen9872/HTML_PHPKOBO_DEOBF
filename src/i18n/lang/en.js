@@ -72,6 +72,11 @@ export default {
   'preview.networkWarningOn': 'fetch/XHR are blocked to keep pasted code offline.',
   'preview.networkWarningOff': 'HTML can call APIs or leak data when network is allowed.',
   'preview.networkGuardMessage': 'Network requests are blocked in preview mode.',
+  'preview.zoomIn': 'Zoom In',
+  'preview.zoomOut': 'Zoom Out',
+  'preview.zoomReset': 'Reset Zoom',
+  'preview.zoom': 'Zoom',
+  'preview.zoomTooltip': 'Adjust preview zoom level',
   
   // Output section
   'output.title': 'OUTPUT',
@@ -122,5 +127,13 @@ export default {
   'toast.beautifyError': 'Unable to beautify code',
   'output.processing': 'Processing...',
   'output.noData': '// No data returned',
+  
+  // Error boundary
+  'error.title': 'Something went wrong',
+  'error.description': 'The application encountered an unexpected error. Please try reloading the page or return to the home page.',
+  'error.message': 'Error message',
+  'error.stackTrace': 'Stack trace (only shown in development mode)',
+  'error.reload': 'Reload Page',
+  'error.goHome': 'Go Home',
 }
 

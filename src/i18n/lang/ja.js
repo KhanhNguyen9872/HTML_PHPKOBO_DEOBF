@@ -72,6 +72,11 @@ export default {
     'preview.networkWarningOn': '貼り付けたコードをオフラインに保つため、fetch/XHRはブロックされます。',
     'preview.networkWarningOff': 'ネットワークが許可されている場合、HTMLはAPI呼び出しやデータ漏洩の可能性があります。',
     'preview.networkGuardMessage': 'プレビューモードではネットワークリクエストがブロックされています。',
+    'preview.zoomIn': 'ズームイン',
+    'preview.zoomOut': 'ズームアウト',
+    'preview.zoomReset': 'ズームリセット',
+    'preview.zoom': 'ズーム',
+    'preview.zoomTooltip': 'プレビューのズームレベルを調整',
   
     // Output section
     'output.title': '出力',
@@ -122,5 +127,13 @@ export default {
     'toast.clear': 'クリア',
     'toast.cancel': 'キャンセル',
     'toast.beautifyError': 'コードを整形できませんでした',
+  
+    // Error boundary
+    'error.title': 'エラーが発生しました',
+    'error.description': 'アプリケーションで予期しないエラーが発生しました。ページを再読み込みするか、ホームページに戻ってください。',
+    'error.message': 'エラーメッセージ',
+    'error.stackTrace': 'スタックトレース（開発モードでのみ表示）',
+    'error.reload': 'ページを再読み込み',
+    'error.goHome': 'ホームに戻る',
   }
   

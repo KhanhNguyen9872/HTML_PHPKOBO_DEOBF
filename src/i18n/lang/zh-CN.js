@@ -72,6 +72,11 @@ export default {
     'preview.networkWarningOn': '为保持粘贴代码离线，fetch/XHR 请求已被阻止。',
     'preview.networkWarningOff': '允许网络后，HTML 可能会调用 API 或泄露数据。',
     'preview.networkGuardMessage': '预览模式下网络请求已被阻止。',
+    'preview.zoomIn': '放大',
+    'preview.zoomOut': '缩小',
+    'preview.zoomReset': '重置缩放',
+    'preview.zoom': '缩放',
+    'preview.zoomTooltip': '调整预览缩放级别',
   
     // Output section
     'output.title': '输出',
@@ -122,5 +127,13 @@ export default {
     'toast.clear': '清空',
     'toast.cancel': '取消',
     'toast.beautifyError': '无法美化代码',
+  
+    // Error boundary
+    'error.title': '出现错误',
+    'error.description': '应用程序遇到了意外错误。请尝试重新加载页面或返回首页。',
+    'error.message': '错误消息',
+    'error.stackTrace': '堆栈跟踪（仅在开发模式下显示）',
+    'error.reload': '重新加载页面',
+    'error.goHome': '返回首页',
   }
   

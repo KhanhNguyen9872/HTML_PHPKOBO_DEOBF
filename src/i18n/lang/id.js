@@ -72,6 +72,11 @@ export default {
     'preview.networkWarningOn': 'fetch/XHR diblokir untuk menjaga agar kode tetap offline.',
     'preview.networkWarningOff': 'HTML mungkin melakukan permintaan API jika jaringan diizinkan.',
     'preview.networkGuardMessage': 'Permintaan jaringan diblokir dalam mode pratinjau.',
+    'preview.zoomIn': 'Perbesar',
+    'preview.zoomOut': 'Perkecil',
+    'preview.zoomReset': 'Reset Zoom',
+    'preview.zoom': 'Zoom',
+    'preview.zoomTooltip': 'Sesuaikan tingkat zoom pratinjau',
   
     // Output section
     'output.title': 'Output',
@@ -122,5 +127,13 @@ export default {
     'toast.clear': 'Hapus',
     'toast.cancel': 'Batal',
     'toast.beautifyError': 'Gagal melakukan beautify kode',
+  
+    // Error boundary
+    'error.title': 'Terjadi kesalahan',
+    'error.description': 'Aplikasi mengalami kesalahan yang tidak terduga. Silakan coba muat ulang halaman atau kembali ke halaman beranda.',
+    'error.message': 'Pesan kesalahan',
+    'error.stackTrace': 'Jejak tumpukan (hanya ditampilkan dalam mode pengembangan)',
+    'error.reload': 'Muat ulang halaman',
+    'error.goHome': 'Kembali ke beranda',
   }
   

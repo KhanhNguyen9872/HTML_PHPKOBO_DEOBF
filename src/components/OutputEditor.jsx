@@ -1,7 +1,7 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
-import Editor from '@monaco-editor/react'
+import LazyMonacoEditor from './LazyMonacoEditor'
 import { Download, Copy, Trash2, Code, Loader, MoreHorizontal, Maximize2, Minimize2 } from 'react-feather'
 import { useI18n } from '../i18n/I18nContext'
 import { html_beautify, css_beautify, js_beautify } from 'js-beautify'
@@ -217,15 +217,43 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
     }
   }
 
-  const actionDisabled = !outputHtml || isProcessing
-  const effectiveReadOnly = isProcessing || isBeautifying || readOnly
-  const overlayActive = isProcessing || isBeautifying
-  const overlayText = isProcessing ? t('output.processing') : t('output.formatting')
-  const fullscreenButtonLabel = isFullscreen ? t('editor.exitFullscreen') : t('editor.fullscreen')
+  const actionDisabled = useMemo(() => !outputHtml || isProcessing, [outputHtml, isProcessing])
+  const effectiveReadOnly = useMemo(() => isProcessing || isBeautifying || readOnly, [isProcessing, isBeautifying, readOnly])
+  const overlayActive = useMemo(() => isProcessing || isBeautifying, [isProcessing, isBeautifying])
+  const overlayText = useMemo(() => isProcessing ? t('output.processing') : t('output.formatting'), [isProcessing, t])
+  const fullscreenButtonLabel = useMemo(() => isFullscreen ? t('editor.exitFullscreen') : t('editor.fullscreen'), [isFullscreen, t])
   const heightClasses = 'h-[600px] sm:h-[500px] md:h-[400px] lg:h-[500px] xl:h-[600px]'
   const baseContainerClasses = 'flex flex-col border border-bw-gray-d dark:border-bw-gray-3 rounded-sm overflow-hidden bg-bw-white dark:bg-bw-gray-2 shadow-sm transition-all'
   const wrapperClasses = isFullscreen ? 'fixed inset-0 z-[60] p-2 sm:p-4 bg-bw-gray-1 dark:bg-bw-gray-1' : 'relative'
-  const containerClass = `${wrapperClasses} ${baseContainerClasses} ${isFullscreen ? 'h-auto min-h-screen' : heightClasses}`
+  const containerClass = useMemo(() => `${wrapperClasses} ${baseContainerClasses} ${isFullscreen ? 'h-auto min-h-screen' : heightClasses}`, [wrapperClasses, isFullscreen])
+
+  const editorOptions = useMemo(() => ({
+    minimap: { enabled: false },
+    fontSize: 14,
+    wordWrap: 'on',
+    automaticLayout: true,
+    formatOnPaste: true,
+    formatOnType: true,
+    tabSize: 4,
+    insertSpaces: true,
+    detectIndentation: false,
+    readOnly: effectiveReadOnly,
+  }), [effectiveReadOnly])
+
+  const handleEditorChange = useCallback((value) => {
+    pendingOutputRef.current = value || ''
+    if (outputUpdateTimerRef.current) {
+      clearTimeout(outputUpdateTimerRef.current)
+    }
+    outputUpdateTimerRef.current = setTimeout(() => {
+      setOutputHtml(pendingOutputRef.current)
+      outputUpdateTimerRef.current = null
+    }, 80)
+  }, [setOutputHtml])
+
+  const handleEditorMount = useCallback((editor) => {
+    outputEditorRef.current = editor
+  }, [])
 
   const baseButtonClass = 'px-1.5 sm:px-2.5 py-1.5 bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-white border border-bw-gray-d dark:border-bw-gray-3 rounded-sm cursor-pointer text-xs font-medium flex items-center gap-1 sm:gap-1.5 hover:bg-bw-gray-f dark:hover:bg-bw-gray-2 hover:border-bw-gray-3 dark:hover:border-bw-gray-7 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden'
   const stackedButtonClass = 'w-full justify-between gap-2'
@@ -260,6 +288,8 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
+          {/* Nhóm Export */}
+          <div className={`flex ${isCompactToolbar ? 'flex-col gap-2' : 'items-center gap-1 sm:gap-1.5'} ${isCompactToolbar ? '' : 'pr-1 sm:pr-2 border-r border-bw-gray-d dark:border-bw-gray-7'}`}>
           <motion.button 
         className={`${baseButtonClass} ${isCompactToolbar ? stackedButtonClass : ''} ${outputCopySuccess ? 'bg-bw-gray-f dark:bg-bw-gray-2' : ''}`}
             onClick={handleOutputDownload}
@@ -289,6 +319,10 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
             <Copy size={12} strokeWidth={2} className="sm:w-3.5 sm:h-3.5 flex-shrink-0" />
         {renderButtonLabel('copy', t('output.copy'))}
           </motion.button>
+          </div>
+
+          {/* Nhóm Format */}
+          <div className={`flex ${isCompactToolbar ? 'flex-col gap-2' : 'items-center gap-1 sm:gap-1.5'} ${isCompactToolbar ? '' : 'pr-1 sm:pr-2 border-r border-bw-gray-d dark:border-bw-gray-7'}`}>
       <div className={`relative ${isCompactToolbar ? 'w-full' : ''}`} ref={beautyDropdownRef}>
             <motion.button 
           className={`${baseButtonClass} ${isCompactToolbar ? stackedButtonClass : ''}`}
@@ -353,6 +387,10 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
               )}
             </AnimatePresence>
           </div>
+          </div>
+
+          {/* Nhóm Clear */}
+          <div className={`flex ${isCompactToolbar ? 'flex-col gap-2' : 'items-center gap-1 sm:gap-1.5'}`}>
           <motion.button 
         className={`${baseButtonClass} ${isCompactToolbar ? stackedButtonClass : ''}`}
             onClick={handleOutputClear}
@@ -366,6 +404,7 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
             <Trash2 size={12} strokeWidth={2} className="sm:w-3.5 sm:h-3.5 flex-shrink-0" />
         {renderButtonLabel('clear', t('output.clear'))}
       </motion.button>
+          </div>
     </motion.div>
   )
 
@@ -437,36 +476,15 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
         </div>
       </div>
       <div className="relative flex-1 overflow-hidden bg-bw-gray-1 dark:bg-bw-gray-1">
-        <Editor
+        <LazyMonacoEditor
+          shouldLoad={!!outputHtml || isProcessing}
           height="100%"
           language="html"
           value={outputHtml}
-          onChange={(value) => {
-            pendingOutputRef.current = value || ''
-            if (outputUpdateTimerRef.current) {
-              clearTimeout(outputUpdateTimerRef.current)
-            }
-            outputUpdateTimerRef.current = setTimeout(() => {
-              setOutputHtml(pendingOutputRef.current)
-              outputUpdateTimerRef.current = null
-            }, 80)
-          }}
+          onChange={handleEditorChange}
           theme={darkMode ? 'vs-dark' : 'vs-light'}
-          onMount={(editor) => {
-            outputEditorRef.current = editor
-          }}
-          options={{
-            minimap: { enabled: false },
-            fontSize: 14,
-            wordWrap: 'on',
-            automaticLayout: true,
-            formatOnPaste: true,
-            formatOnType: true,
-            tabSize: 4,
-            insertSpaces: true,
-            detectIndentation: false,
-            readOnly: effectiveReadOnly,
-          }}
+          onMount={handleEditorMount}
+          options={editorOptions}
         />
         {overlayActive && (
           <motion.div

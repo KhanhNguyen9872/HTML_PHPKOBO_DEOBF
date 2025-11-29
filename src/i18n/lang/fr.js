@@ -72,6 +72,11 @@ export default {
     'preview.networkWarningOn': 'fetch/XHR est bloqué pour garder votre code hors ligne.',
     'preview.networkWarningOff': 'Le HTML peut appeler des APIs ou envoyer des données si le réseau est autorisé.',
     'preview.networkGuardMessage': 'Les requêtes réseau sont bloquées en mode aperçu.',
+    'preview.zoomIn': 'Zoom avant',
+    'preview.zoomOut': 'Zoom arrière',
+    'preview.zoomReset': 'Réinitialiser le zoom',
+    'preview.zoom': 'Zoom',
+    'preview.zoomTooltip': 'Ajuster le niveau de zoom de l\'aperçu',
   
     // Output section
     'output.title': 'SORTIE',
@@ -121,6 +126,14 @@ export default {
     'toast.clearOutputConfirm': 'Voulez-vous vraiment effacer tout le contenu de SORTIE ?',
     'toast.clear': 'Effacer',
     'toast.cancel': 'Annuler',
-    'toast.beautifyError': 'Impossible d’embellir le code',
+    'toast.beautifyError': 'Impossible d\'embellir le code',
+  
+    // Error boundary
+    'error.title': 'Une erreur s\'est produite',
+    'error.description': 'L\'application a rencontré une erreur inattendue. Veuillez essayer de recharger la page ou retourner à la page d\'accueil.',
+    'error.message': 'Message d\'erreur',
+    'error.stackTrace': 'Trace de la pile (affichée uniquement en mode développement)',
+    'error.reload': 'Recharger la page',
+    'error.goHome': 'Retour à l\'accueil',
   }
   

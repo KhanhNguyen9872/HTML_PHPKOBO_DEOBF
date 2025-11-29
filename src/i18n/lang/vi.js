@@ -72,6 +72,11 @@ export default {
   'preview.networkWarningOn': 'Đang chặn fetch/XHR để tránh script lạ truy cập Internet.',
   'preview.networkWarningOff': 'Mã HTML có thể gọi API hoặc gửi dữ liệu ra ngoài, hãy cẩn thận!',
   'preview.networkGuardMessage': 'Yêu cầu mạng bị chặn trong chế độ preview.',
+  'preview.zoomIn': 'Phóng to',
+  'preview.zoomOut': 'Thu nhỏ',
+  'preview.zoomReset': 'Đặt lại zoom',
+  'preview.zoom': 'Zoom',
+  'preview.zoomTooltip': 'Điều chỉnh mức độ phóng to preview',
   
   // Output section
   'output.title': 'OUTPUT',
@@ -122,5 +127,13 @@ export default {
   'toast.beautifyError': 'Lỗi khi beautify code',
   'output.processing': 'Đang xử lý...',
   'output.noData': '// Khong co du lieu tra ve',
+  
+  // Error boundary
+  'error.title': 'Đã xảy ra lỗi',
+  'error.description': 'Ứng dụng gặp sự cố không mong muốn. Vui lòng thử tải lại trang hoặc quay về trang chủ.',
+  'error.message': 'Thông báo lỗi',
+  'error.stackTrace': 'Chi tiết lỗi (chỉ hiển thị trong chế độ phát triển)',
+  'error.reload': 'Tải lại trang',
+  'error.goHome': 'Về trang chủ',
 }
 

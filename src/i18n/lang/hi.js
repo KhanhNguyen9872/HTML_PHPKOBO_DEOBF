@@ -72,6 +72,11 @@ export default {
     'preview.networkWarningOn': 'पेस्ट किए गए कोड को ऑफ़लाइन रखने के लिए fetch/XHR ब्लॉक है।',
     'preview.networkWarningOff': 'HTML नेटवर्क अनुमति होने पर API कॉल कर सकता है या डेटा लीक कर सकता है।',
     'preview.networkGuardMessage': 'पूर्वावलोकन मोड में नेटवर्क अनुरोध ब्लॉक हैं।',
+    'preview.zoomIn': 'ज़ूम इन',
+    'preview.zoomOut': 'ज़ूम आउट',
+    'preview.zoomReset': 'ज़ूम रीसेट करें',
+    'preview.zoom': 'ज़ूम',
+    'preview.zoomTooltip': 'पूर्वावलोकन ज़ूम स्तर समायोजित करें',
   
     // Output section
     'output.title': 'आउटपुट',
@@ -122,5 +127,13 @@ export default {
     'toast.clear': 'साफ़ करें',
     'toast.cancel': 'रद्द करें',
     'toast.beautifyError': 'कोड को सुंदर बनाने में असमर्थ',
+  
+    // Error boundary
+    'error.title': 'कुछ गलत हो गया',
+    'error.description': 'एप्लिकेशन में एक अप्रत्याशित त्रुटि आई। कृपया पृष्ठ को पुनः लोड करने का प्रयास करें या होम पेज पर वापस जाएं।',
+    'error.message': 'त्रुटि संदेश',
+    'error.stackTrace': 'स्टैक ट्रेस (केवल विकास मोड में दिखाया गया)',
+    'error.reload': 'पृष्ठ पुनः लोड करें',
+    'error.goHome': 'होम पर जाएं',
   }
   

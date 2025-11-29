@@ -72,6 +72,11 @@ export default {
     'preview.networkWarningOn': 'fetch/XHR está bloqueado para mantener el código pegado sin conexión.',
     'preview.networkWarningOff': 'El HTML puede llamar APIs o filtrar datos cuando la red está permitida.',
     'preview.networkGuardMessage': 'Las solicitudes de red están bloqueadas en modo vista previa.',
+    'preview.zoomIn': 'Acercar',
+    'preview.zoomOut': 'Alejar',
+    'preview.zoomReset': 'Restablecer zoom',
+    'preview.zoom': 'Zoom',
+    'preview.zoomTooltip': 'Ajustar el nivel de zoom de la vista previa',
   
     // Output section
     'output.title': 'SALIDA',
@@ -122,5 +127,13 @@ export default {
     'toast.clear': 'Limpiar',
     'toast.cancel': 'Cancelar',
     'toast.beautifyError': 'No se pudo embellecer el código',
+  
+    // Error boundary
+    'error.title': 'Algo salió mal',
+    'error.description': 'La aplicación encontró un error inesperado. Por favor, intente recargar la página o volver a la página de inicio.',
+    'error.message': 'Mensaje de error',
+    'error.stackTrace': 'Rastreo de pila (solo se muestra en modo desarrollo)',
+    'error.reload': 'Recargar página',
+    'error.goHome': 'Ir al inicio',
   }
   

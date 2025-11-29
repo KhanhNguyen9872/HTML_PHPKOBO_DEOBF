@@ -1,10 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo, memo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Smartphone, Monitor, Settings } from 'react-feather'
+import { Smartphone, Monitor, Settings, ZoomIn, ZoomOut, RotateCcw } from 'react-feather'
 import { useI18n } from '../i18n/I18nContext'
 import HTMLExecutor from './HTMLExecutor'
 
-export default function Preview({ 
+const MIN_ZOOM = 25
+const MAX_ZOOM = 200
+const ZOOM_STEP = 25
+const DEFAULT_ZOOM = 100
+
+function Preview({ 
   html, 
   reloadKey,
   viewMode, 
@@ -21,8 +26,17 @@ export default function Preview({
 }) {
   const { t } = useI18n()
   const [hoveredButton, setHoveredButton] = useState(null)
+  const [zoomLevel, setZoomLevel] = useState(() => {
+    const saved = localStorage.getItem('preview-zoom')
+    const parsed = saved ? parseInt(saved, 10) : DEFAULT_ZOOM
+    return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, parsed || DEFAULT_ZOOM))
+  })
 
-  const itemVariants = {
+  useEffect(() => {
+    localStorage.setItem('preview-zoom', zoomLevel.toString())
+  }, [zoomLevel])
+
+  const itemVariantsMemo = useMemo(() => ({
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
@@ -32,7 +46,32 @@ export default function Preview({
         ease: [0.6, -0.05, 0.01, 0.99]
       }
     }
-  }
+  }), [])
+
+  const handleZoomIn = useCallback(() => {
+    setZoomLevel(prev => Math.min(MAX_ZOOM, prev + ZOOM_STEP))
+  }, [])
+
+  const handleZoomOut = useCallback(() => {
+    setZoomLevel(prev => Math.max(MIN_ZOOM, prev - ZOOM_STEP))
+  }, [])
+
+  const handleZoomReset = useCallback(() => {
+    setZoomLevel(DEFAULT_ZOOM)
+  }, [])
+
+  const itemVariants = useMemo(() => ({
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.4,
+        ease: [0.6, -0.05, 0.01, 0.99]
+      }
+    }
+  }), [])
+
 
   return (
     <AnimatePresence>
@@ -43,7 +82,7 @@ export default function Preview({
               ? 'flex-1 min-h-0' 
               : 'flex-1 min-h-[300px] sm:min-h-[400px] md:min-h-[520px] overflow-hidden'
           }`}
-          variants={itemVariants}
+          variants={itemVariantsMemo}
           initial={{ opacity: 0 }}
           animate={{ 
             opacity: 1
@@ -64,6 +103,72 @@ export default function Preview({
             <span className="font-bold tracking-wide">{t('preview.title')}</span>
               <motion.div 
                 className="flex gap-1 sm:gap-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+              >
+              {/* Nhóm Zoom */}
+              <motion.div 
+                className="flex gap-1 sm:gap-1.5 border-l border-bw-gray-d dark:border-bw-gray-7 pl-1 sm:pl-2 ml-1 sm:ml-2 pr-1 sm:pr-2 border-r border-bw-gray-d dark:border-bw-gray-7"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <motion.button
+                  className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-sm cursor-pointer text-xs font-medium border flex items-center gap-1 sm:gap-1.5 overflow-hidden transition-colors bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-gray-d border-bw-gray-d dark:border-bw-gray-3 hover:bg-bw-gray-f dark:hover:bg-bw-gray-2 hover:border-bw-gray-3 dark:hover:border-bw-gray-d dark:hover:text-bw-white disabled:opacity-50 disabled:cursor-not-allowed`}
+                  onClick={handleZoomOut}
+                  disabled={zoomLevel <= MIN_ZOOM}
+                  title={t('preview.zoomOut')}
+                  onMouseEnter={() => setHoveredButton('zoomOut')}
+                  onMouseLeave={() => setHoveredButton(null)}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ZoomOut size={12} strokeWidth={2} className="sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+                  <span className="hidden sm:inline md:hidden">-</span>
+                </motion.button>
+                <motion.button
+                  className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-sm cursor-pointer text-xs font-medium border flex items-center gap-1 sm:gap-1.5 overflow-hidden transition-colors bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-gray-d border-bw-gray-d dark:border-bw-gray-3 hover:bg-bw-gray-f dark:hover:bg-bw-gray-2 hover:border-bw-gray-3 dark:hover:border-bw-gray-d dark:hover:text-bw-white`}
+                  onClick={handleZoomReset}
+                  title={t('preview.zoomReset')}
+                  onMouseEnter={() => setHoveredButton('zoomReset')}
+                  onMouseLeave={() => setHoveredButton(null)}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <RotateCcw size={12} strokeWidth={2} className="sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+                  <span className="hidden sm:inline md:hidden">{zoomLevel}%</span>
+                  <motion.span
+                    className="hidden md:block whitespace-nowrap"
+                    initial={{ maxWidth: 0, opacity: 0 }}
+                    animate={{
+                      maxWidth: hoveredButton === 'zoomReset' ? 200 : 0,
+                      opacity: hoveredButton === 'zoomReset' ? 1 : 0,
+                    }}
+                    transition={{ duration: 0.2 }}
+                    style={{ overflow: 'hidden' }}
+                  >
+                    {zoomLevel}%
+                  </motion.span>
+                </motion.button>
+                <motion.button
+                  className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-sm cursor-pointer text-xs font-medium border flex items-center gap-1 sm:gap-1.5 overflow-hidden transition-colors bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-gray-d border-bw-gray-d dark:border-bw-gray-3 hover:bg-bw-gray-f dark:hover:bg-bw-gray-2 hover:border-bw-gray-3 dark:hover:border-bw-gray-d dark:hover:text-bw-white disabled:opacity-50 disabled:cursor-not-allowed`}
+                  onClick={handleZoomIn}
+                  disabled={zoomLevel >= MAX_ZOOM}
+                  title={t('preview.zoomIn')}
+                  onMouseEnter={() => setHoveredButton('zoomIn')}
+                  onMouseLeave={() => setHoveredButton(null)}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ZoomIn size={12} strokeWidth={2} className="sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+                  <span className="hidden sm:inline md:hidden">+</span>
+                </motion.button>
+              </motion.div>
+
+              {/* Nhóm View Mode */}
+              <motion.div 
+                className="flex gap-1 sm:gap-1.5 pl-1 sm:pl-2"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
@@ -181,6 +286,7 @@ export default function Preview({
                 </motion.span>
               </motion.button>
               </motion.div>
+              </motion.div>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-[11px] sm:text-xs text-bw-gray-8 dark:text-bw-gray-d">
               <label className="inline-flex items-center gap-2 font-medium text-bw-black dark:text-bw-gray-d">
@@ -263,10 +369,13 @@ export default function Preview({
             shouldLoad={showPreview}
             darkMode={darkMode}
             blockNetwork={blockNetwork}
+            zoomLevel={zoomLevel}
           />
         </motion.div>
       )}
     </AnimatePresence>
   )
 }
+
+export default memo(Preview)
 

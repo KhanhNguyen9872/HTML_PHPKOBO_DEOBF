@@ -72,6 +72,11 @@ export default {
     'preview.networkWarningOn': 'Ang fetch/XHR ay naka-block upang manatiling offline ang ipinasang code.',
     'preview.networkWarningOff': 'Maaaring tumawag ang HTML ng APIs o mag-leak ng data kapag pinahintulutan ang network.',
     'preview.networkGuardMessage': 'Naka-block ang network requests sa preview mode.',
+    'preview.zoomIn': 'Palakihin',
+    'preview.zoomOut': 'Paliitin',
+    'preview.zoomReset': 'I-reset ang Zoom',
+    'preview.zoom': 'Zoom',
+    'preview.zoomTooltip': 'I-adjust ang antas ng zoom ng preview',
   
     // Output section
     'output.title': 'OUTPUT',
@@ -122,5 +127,13 @@ export default {
     'toast.clear': 'I-clear',
     'toast.cancel': 'Kanselahin',
     'toast.beautifyError': 'Hindi ma-beautify ang code',
+  
+    // Error boundary
+    'error.title': 'May naganap na error',
+    'error.description': 'Nakaranas ang application ng hindi inaasahang error. Subukan mong i-reload ang pahina o bumalik sa home page.',
+    'error.message': 'Mensahe ng error',
+    'error.stackTrace': 'Stack trace (ipinapakita lamang sa development mode)',
+    'error.reload': 'I-reload ang pahina',
+    'error.goHome': 'Bumalik sa home',
   }
   

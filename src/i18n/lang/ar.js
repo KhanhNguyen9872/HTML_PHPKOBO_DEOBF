@@ -72,6 +72,11 @@ export default {
     'preview.networkWarningOn': 'تم حظر fetch/XHR للحفاظ على عمل الكود دون اتصال.',
     'preview.networkWarningOff': 'قد يقوم HTML بإجراء طلبات API عند السماح بالشبكة.',
     'preview.networkGuardMessage': 'تم حظر طلبات الشبكة في وضع المعاينة.',
+    'preview.zoomIn': 'تكبير',
+    'preview.zoomOut': 'تصغير',
+    'preview.zoomReset': 'إعادة تعيين التكبير',
+    'preview.zoom': 'التكبير',
+    'preview.zoomTooltip': 'تعديل مستوى تكبير المعاينة',
   
     // Output section
     'output.title': 'المخرجات',
@@ -122,5 +127,13 @@ export default {
     'toast.clear': 'مسح',
     'toast.cancel': 'إلغاء',
     'toast.beautifyError': 'فشل تحسين الكود',
+  
+    // Error boundary
+    'error.title': 'حدث خطأ',
+    'error.description': 'واجه التطبيق خطأ غير متوقع. يرجى محاولة إعادة تحميل الصفحة أو العودة إلى الصفحة الرئيسية.',
+    'error.message': 'رسالة الخطأ',
+    'error.stackTrace': 'تفاصيل الخطأ (يظهر فقط في وضع التطوير)',
+    'error.reload': 'إعادة تحميل الصفحة',
+    'error.goHome': 'العودة إلى الصفحة الرئيسية',
   }
   

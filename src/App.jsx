@@ -1,12 +1,16 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { Play, Loader, Sliders } from 'react-feather'
 import { useI18n } from './i18n/I18nContext'
 import Header from './components/Header'
-import InputEditor from './components/InputEditor'
-import Preview from './components/Preview'
-import OutputEditor from './components/OutputEditor'
+import PreviewSkeleton from './components/PreviewSkeleton'
+import DelayedSuspense from './components/DelayedSuspense'
+
+// Lazy load các component lớn
+const InputEditor = lazy(() => import('./components/InputEditor'))
+const Preview = lazy(() => import('./components/Preview'))
+const OutputEditor = lazy(() => import('./components/OutputEditor'))
 
 const SNAPSHOT_LIMIT = 10
 const DEFAULT_CUSTOM_SIZE = { width: 1200, height: 800 }
@@ -342,7 +346,8 @@ function App() {
         className="flex flex-col flex-1 gap-3 sm:gap-4 p-2 sm:p-4"
         variants={containerVariants}
       >
-        <InputEditor 
+        <DelayedSuspense fallback={<PreviewSkeleton />} delay={500}>
+          <InputEditor 
           html={html}
           setHtml={setHtml}
           fileName={fileName}
@@ -384,6 +389,7 @@ function App() {
             }
           }}
         />
+        </DelayedSuspense>
 
         <motion.div
           className="flex flex-col lg:flex-row items-center justify-center gap-2 sm:gap-4 py-2 sm:py-4"
@@ -454,21 +460,24 @@ function App() {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
             >
-              <OutputEditor
-                outputHtml={outputHtml}
-                setOutputHtml={setOutputHtml}
-                fileName={fileName}
-                outputEditorRef={outputEditorRef}
-                darkMode={darkMode}
-                isProcessing={isProcessing}
-                readOnly={outputReadOnly}
-                onReadOnlyChange={setOutputReadOnly}
-              />
+              <DelayedSuspense fallback={<PreviewSkeleton />} delay={500}>
+                <OutputEditor
+                  outputHtml={outputHtml}
+                  setOutputHtml={setOutputHtml}
+                  fileName={fileName}
+                  outputEditorRef={outputEditorRef}
+                  darkMode={darkMode}
+                  isProcessing={isProcessing}
+                  readOnly={outputReadOnly}
+                  onReadOnlyChange={setOutputReadOnly}
+                />
+              </DelayedSuspense>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <Preview
+        <DelayedSuspense fallback={<PreviewSkeleton />} delay={500}>
+          <Preview
           html={previewHtml}
           reloadKey={previewNonce}
           viewMode={viewMode}
@@ -483,6 +492,7 @@ function App() {
           blockNetwork={blockNetwork}
           setBlockNetwork={setBlockNetwork}
         />
+        </DelayedSuspense>
       </motion.div>
     </motion.div>
   )

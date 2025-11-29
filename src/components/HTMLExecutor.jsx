@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo, useCallback, memo } from 'react'
 import { motion } from 'framer-motion'
 import { useI18n } from '../i18n/I18nContext'
 
-function HTMLExecutor({ html, reloadKey, viewMode, customWidth, customHeight, onWidthChange, onHeightChange, onLoad, shouldLoad, darkMode, blockNetwork }) {
+function HTMLExecutor({ html, reloadKey, viewMode, customWidth, customHeight, onWidthChange, onHeightChange, onLoad, shouldLoad, darkMode, blockNetwork, zoomLevel = 100 }) {
   const { t } = useI18n()
   const [iframeContent, setIframeContent] = useState('')
   const [iframeStyle, setIframeStyle] = useState({})
@@ -419,80 +419,114 @@ function HTMLExecutor({ html, reloadKey, viewMode, customWidth, customHeight, on
       } : {}}
     >
       {viewMode === 'desktop' ? (
-        <iframe
-          ref={iframeRef}
-          key={`iframe-${iframeKey}`}
-          title="preview"
-          srcDoc={iframeContent}
-          className="border-none bg-bw-white"
-          style={{ 
-            width: '100%', 
-            minHeight: '75vh',
-            height: '75vh',
-            border: 'none', 
-            display: 'block',
-            flexShrink: 0,
-            overflow: 'auto'
+        <div 
+          className="flex items-center justify-center w-full h-full overflow-auto"
+          style={{
+            padding: zoomLevel !== 100 ? '20px' : '0'
           }}
-          sandbox="allow-scripts allow-same-origin"
-          scrolling="yes"
-          onLoad={() => {
-            if (onLoad && iframeContent && shouldLoad && !hasLoaded) {
-              setHasLoaded(true)
-              notifyParentWithContent()
-            }
-          }}
-        />
-      ) : (
-        <div className="relative" style={viewMode === 'custom' ? { width: `${customWidth}px`, height: `${customHeight}px`, margin: '0 auto', position: 'relative' } : {}}>
-          {viewMode === 'custom' && (
-            <>
-              {/* Width resize handles */}
-              <div 
-                className="absolute top-0 bottom-0 w-4 cursor-ew-resize z-10 bg-transparent transition-colors duration-200 hover:bg-bw-gray-d/30 -left-2"
-                onMouseDown={(e) => handleMouseDown(e, 'left')}
-                style={{ touchAction: 'none' }}
-              />
-              <div 
-                className="absolute top-0 bottom-0 w-4 cursor-ew-resize z-10 bg-transparent transition-colors duration-200 hover:bg-bw-gray-d/30 -right-2"
-                onMouseDown={(e) => handleMouseDown(e, 'right')}
-                style={{ touchAction: 'none' }}
-              />
-              {/* Height resize handles */}
-              <div 
-                className="absolute left-0 right-0 h-4 cursor-ns-resize z-10 bg-transparent transition-colors duration-200 hover:bg-bw-gray-d/30 -top-2"
-                onMouseDown={(e) => handleMouseDown(e, 'top')}
-                style={{ touchAction: 'none' }}
-              />
-              <div 
-                className="absolute left-0 right-0 h-4 cursor-ns-resize z-10 bg-transparent transition-colors duration-200 hover:bg-bw-gray-d/30 -bottom-2"
-                onMouseDown={(e) => handleMouseDown(e, 'bottom')}
-                style={{ touchAction: 'none' }}
-              />
-            </>
-          )}
-          <iframe
-            ref={iframeRef}
-            key={`iframe-${iframeKey}`}
-            title="preview"
-            srcDoc={iframeContent}
-            className="border-none bg-bw-white"
-            style={
-              viewMode === 'custom'
-                ? { width: `${customWidth}px`, height: `${customHeight}px`, border: '1px solid #dddddd', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }
-                : iframeStyle
-            }
-            sandbox="allow-scripts allow-same-origin"
-            onLoad={() => {
-              if (onLoad && iframeContent) {
-                notifyParentWithContent()
-              }
+        >
+          <div
+            style={{
+              transform: `scale(${zoomLevel / 100})`,
+              transformOrigin: 'center center',
+              width: zoomLevel !== 100 ? `${100 / (zoomLevel / 100)}%` : '100%',
+              height: zoomLevel !== 100 ? `${100 / (zoomLevel / 100)}%` : '100%',
+              transition: 'transform 0.2s ease-in-out',
+              display: 'flex',
+              flexDirection: 'column'
             }}
-          />
+          >
+            <iframe
+              ref={iframeRef}
+              key={`iframe-${iframeKey}`}
+              title="preview"
+              srcDoc={iframeContent}
+              className="border-none bg-bw-white"
+              style={{ 
+                width: '100%', 
+                minHeight: '75vh',
+                height: '75vh',
+                border: 'none', 
+                display: 'block',
+                flexShrink: 0,
+                overflow: 'auto'
+              }}
+              sandbox="allow-scripts allow-same-origin"
+              scrolling="yes"
+              onLoad={() => {
+                if (onLoad && iframeContent && shouldLoad && !hasLoaded) {
+                  setHasLoaded(true)
+                  notifyParentWithContent()
+                }
+              }}
+            />
+          </div>
+        </div>
+      ) : (
+        <div 
+          className="relative flex items-center justify-center w-full h-full"
+          style={{
+            padding: zoomLevel !== 100 ? '20px' : '0'
+          }}
+        >
+          <div
+            style={{
+              transform: `scale(${zoomLevel / 100})`,
+              transformOrigin: 'center center',
+              transition: 'transform 0.2s ease-in-out'
+            }}
+          >
+            <div className="relative" style={viewMode === 'custom' ? { width: `${customWidth}px`, height: `${customHeight}px`, margin: '0 auto', position: 'relative' } : {}}>
+              {viewMode === 'custom' && (
+                <>
+                  {/* Width resize handles */}
+                  <div 
+                    className="absolute top-0 bottom-0 w-4 cursor-ew-resize z-10 bg-transparent transition-colors duration-200 hover:bg-bw-gray-d/30 -left-2"
+                    onMouseDown={(e) => handleMouseDown(e, 'left')}
+                    style={{ touchAction: 'none' }}
+                  />
+                  <div 
+                    className="absolute top-0 bottom-0 w-4 cursor-ew-resize z-10 bg-transparent transition-colors duration-200 hover:bg-bw-gray-d/30 -right-2"
+                    onMouseDown={(e) => handleMouseDown(e, 'right')}
+                    style={{ touchAction: 'none' }}
+                  />
+                  {/* Height resize handles */}
+                  <div 
+                    className="absolute left-0 right-0 h-4 cursor-ns-resize z-10 bg-transparent transition-colors duration-200 hover:bg-bw-gray-d/30 -top-2"
+                    onMouseDown={(e) => handleMouseDown(e, 'top')}
+                    style={{ touchAction: 'none' }}
+                  />
+                  <div 
+                    className="absolute left-0 right-0 h-4 cursor-ns-resize z-10 bg-transparent transition-colors duration-200 hover:bg-bw-gray-d/30 -bottom-2"
+                    onMouseDown={(e) => handleMouseDown(e, 'bottom')}
+                    style={{ touchAction: 'none' }}
+                  />
+                </>
+              )}
+              <iframe
+                ref={iframeRef}
+                key={`iframe-${iframeKey}`}
+                title="preview"
+                srcDoc={iframeContent}
+                className="border-none bg-bw-white"
+                style={
+                  viewMode === 'custom'
+                    ? { width: `${customWidth}px`, height: `${customHeight}px`, border: '1px solid #dddddd', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }
+                    : iframeStyle
+                }
+                sandbox="allow-scripts allow-same-origin"
+                onLoad={() => {
+                  if (onLoad && iframeContent) {
+                    notifyParentWithContent()
+                  }
+                }}
+              />
+            </div>
+          </div>
         </div>
       )}
     </motion.div>
   )
 }
 
-export default HTMLExecutor
+export default memo(HTMLExecutor)

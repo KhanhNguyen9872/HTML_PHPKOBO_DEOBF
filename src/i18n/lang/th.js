@@ -72,6 +72,11 @@ export default {
     'preview.networkWarningOn': 'fetch/XHR ถูกบล็อกเพื่อให้โค้ดที่วางอยู่ทำงานแบบออฟไลน์',
     'preview.networkWarningOff': 'HTML อาจเรียก API หรือรั่วข้อมูลเมื่ออนุญาตเครือข่าย',
     'preview.networkGuardMessage': 'คำขอเครือข่ายถูกบล็อกในโหมดตัวอย่าง',
+    'preview.zoomIn': 'ขยาย',
+    'preview.zoomOut': 'ย่อ',
+    'preview.zoomReset': 'รีเซ็ตซูม',
+    'preview.zoom': 'ซูม',
+    'preview.zoomTooltip': 'ปรับระดับการซูมของตัวอย่าง',
   
     // Output section
     'output.title': 'ผลลัพธ์',
@@ -122,5 +127,13 @@ export default {
     'toast.clear': 'ล้าง',
     'toast.cancel': 'ยกเลิก',
     'toast.beautifyError': 'ไม่สามารถตกแต่งโค้ดได้',
+  
+    // Error boundary
+    'error.title': 'เกิดข้อผิดพลาด',
+    'error.description': 'แอปพลิเคชันพบข้อผิดพลาดที่ไม่คาดคิด กรุณาลองโหลดหน้าใหม่หรือกลับไปที่หน้าแรก',
+    'error.message': 'ข้อความข้อผิดพลาด',
+    'error.stackTrace': 'รายละเอียดข้อผิดพลาด (แสดงเฉพาะในโหมดพัฒนา)',
+    'error.reload': 'โหลดหน้าใหม่',
+    'error.goHome': 'กลับไปหน้าแรก',
   }
   
