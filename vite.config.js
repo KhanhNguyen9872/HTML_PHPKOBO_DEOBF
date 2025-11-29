@@ -27,7 +27,7 @@ export default defineConfig({
           compact: true,
           controlFlowFlattening: false, // Tắt để tăng tốc
           controlFlowFlatteningThreshold: 0,
-          deadCodeInjection: true, // Tắt để tăng tốc
+          deadCodeInjection: false, // Tắt để tăng tốc
           debugProtection: false, // Tắt để tăng tốc
           debugProtectionInterval: 0,
           disableConsoleOutput: true,
@@ -59,7 +59,13 @@ export default defineConfig({
   ].filter(Boolean),
   build: {
     sourcemap: false,
-    minify: 'esbuild'
+    minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        manualChunks: undefined, // Tắt manual chunks, gom tất cả vào một file
+        inlineDynamicImports: true // Gom tất cả dynamic imports vào một chunk
+      }
+    }
   }
 })
 
