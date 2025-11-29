@@ -446,22 +446,6 @@ function App() {
           )}
         </motion.div>
         
-        <Preview
-          html={previewHtml}
-          reloadKey={previewNonce}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          customWidth={customWidth}
-          setCustomWidth={setCustomWidth}
-          customHeight={customHeight}
-          setCustomHeight={setCustomHeight}
-          onLoad={handlePreviewLoad}
-          showPreview={showPreview}
-          darkMode={darkMode}
-          blockNetwork={blockNetwork}
-          setBlockNetwork={setBlockNetwork}
-        />
-
         <AnimatePresence>
           {(hasProcessed || isProcessing || outputHtml) && (
             <motion.div
@@ -483,6 +467,22 @@ function App() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        <Preview
+          html={previewHtml}
+          reloadKey={previewNonce}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          customWidth={customWidth}
+          setCustomWidth={setCustomWidth}
+          customHeight={customHeight}
+          setCustomHeight={setCustomHeight}
+          onLoad={handlePreviewLoad}
+          showPreview={showPreview}
+          darkMode={darkMode}
+          blockNetwork={blockNetwork}
+          setBlockNetwork={setBlockNetwork}
+        />
       </motion.div>
     </motion.div>
   )

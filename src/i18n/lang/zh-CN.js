@@ -1,6 +1,7 @@
 export default {
     // Common
     'common.more': '更多',
+    'common.cancel': '取消',
     'editor.fullscreen': '全屏',
     'editor.exitFullscreen': '退出全屏',
     'editor.readOnly': '只读',
@@ -19,7 +20,11 @@ export default {
     'input.upload': '上传文件',
     'input.loadUrl': '从 URL 加载',
     'input.loadUrlTooltip': '输入一个 URL 来获取 HTML',
-    'input.loadUrlPrompt': '粘贴包含 HTML 的 URL',
+    'input.loadUrlPrompt': '输入 HTML URL 或网站链接',
+    'input.load': '加载',
+    'input.urlPlaceholder': 'https://example.com/file.html 或 https://example.com',
+    'input.urlFileHint': '文件链接 (.html, .htm, .txt): 直接下载文件',
+    'input.urlWebsiteHint': '网站链接: 获取页面的完整 HTML',
     'input.loadClipboard': '从剪贴板粘贴',
     'input.loadClipboardTooltip': '从剪贴板读取 HTML',
     'input.download': '下载',
@@ -46,9 +51,9 @@ export default {
     // Process button
     'process.button': '处理',
     'process.buttonProcessing': '处理中...',
-    'process.autoToggle': '自动预览',
+    'process.autoToggle': '自动处理',
     'process.autoOn': '停止输入后自动运行',
-    'process.autoOff': '仅在点击“处理”时运行',
+    'process.autoOff': '仅在点击"处理"时运行',
     'process.autoDelayLabel': '延迟：{value}ms',
   
     // Preview section
@@ -102,7 +107,10 @@ export default {
     'toast.snapshotStorageWarning': '存储空间不足。已删除较旧的快照以保存新的快照。',
     'toast.networkUnblocked': '网络保护已关闭 —— 粘贴的 HTML 现在可以发起外部请求。',
     'toast.loadedFromUrl': '已从 {url} 加载 HTML',
-    'toast.loadFromUrlError': '无法从 URL 加载 HTML，请重试。',
+    'toast.loadedFromUrlFile': '文件加载成功',
+    'toast.loadedFromUrlWebsite': '网站 HTML 加载成功',
+    'toast.loadFromUrlError': '无法加载 URL。可能是由于 CORS 或无效的 URL。',
+    'toast.urlEmpty': 'URL 不能为空',
     'toast.loadedFromClipboard': '已从剪贴板读取 HTML',
     'toast.clipboardUnsupported': '此浏览器不支持剪贴板 API',
     'toast.clipboardEmpty': '剪贴板为空',

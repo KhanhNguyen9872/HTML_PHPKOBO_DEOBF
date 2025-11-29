@@ -24,6 +24,8 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isBeautifying, setIsBeautifying] = useState(false)
   const [isUrlLoading, setIsUrlLoading] = useState(false)
+  const [isUrlOverlayOpen, setIsUrlOverlayOpen] = useState(false)
+  const [urlInput, setUrlInput] = useState('')
   const fileInputRef = useRef(null)
   const beautyDropdownRef = useRef(null)
   const historyDropdownRef = useRef(null)
@@ -217,6 +219,100 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
     }
   }, [isCompactToolbar])
 
+  const handleLoadFromUrl = useCallback(() => {
+    setIsUrlOverlayOpen(true)
+    setUrlInput('')
+    // Focus vào input sau khi overlay mở
+    setTimeout(() => {
+      const input = document.querySelector('input[type="text"][placeholder*="https://"]')
+      if (input) input.focus()
+    }, 100)
+  }, [])
+
+  const handleUrlSubmit = useCallback(async () => {
+    const url = urlInput.trim()
+    if (!url) {
+      toast.error(t('toast.urlEmpty'), {
+        icon: <AlertCircle size={18} strokeWidth={2} />
+      })
+      return
+    }
+
+    setIsUrlOverlayOpen(false)
+    setIsUrlLoading(true)
+
+    try {
+      // Kiểm tra xem URL có phải là file download không (kết thúc bằng .html, .htm, .txt)
+      const isFileUrl = /\.(html|htm|txt)(\?.*)?$/i.test(url)
+      
+      if (isFileUrl) {
+        // Tải file trực tiếp, nếu gặp CORS thì dùng proxy
+        try {
+          const response = await fetch(url)
+          if (!response.ok) {
+            throw new Error('Failed to fetch file')
+          }
+          const text = await response.text()
+          setHtml(text)
+          setFileName(url.split('/').pop().split('?')[0] || 'input.html')
+          toast.success(t('toast.loadedFromUrlFile'), {
+            icon: <CheckCircle size={18} strokeWidth={2} />
+          })
+        } catch (fileError) {
+          // Nếu gặp CORS với file, dùng proxy
+          console.warn('Direct fetch failed, trying proxy:', fileError)
+          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
+          const proxyResponse = await fetch(proxyUrl)
+          
+          if (!proxyResponse.ok) {
+            throw new Error(`Proxy HTTP ${proxyResponse.status}`)
+          }
+          
+          const proxyData = await proxyResponse.json()
+          
+          if (!proxyData.contents) {
+            throw new Error('No content from proxy')
+          }
+          
+          setHtml(proxyData.contents)
+          setFileName(url.split('/').pop().split('?')[0] || 'input.html')
+          toast.success(t('toast.loadedFromUrlFile'), {
+            icon: <CheckCircle size={18} strokeWidth={2} />
+          })
+        }
+      } else {
+        // Fetch HTML của website - dùng proxy ngay vì thường gặp CORS
+        // Thử dùng proxy CORS
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
+        const proxyResponse = await fetch(proxyUrl)
+        
+        if (!proxyResponse.ok) {
+          throw new Error(`Proxy HTTP ${proxyResponse.status}`)
+        }
+        
+        const proxyData = await proxyResponse.json()
+        
+        if (!proxyData.contents) {
+          throw new Error('No content from proxy')
+        }
+        
+        setHtml(proxyData.contents)
+        setFileName(null)
+        toast.success(t('toast.loadedFromUrlWebsite'), {
+          icon: <CheckCircle size={18} strokeWidth={2} />
+        })
+      }
+    } catch (error) {
+      console.error('Load URL error:', error)
+      toast.error(t('toast.loadFromUrlError'), {
+        icon: <XCircle size={18} strokeWidth={2} />
+      })
+    } finally {
+      setIsUrlLoading(false)
+      setUrlInput('')
+    }
+  }, [urlInput, setHtml, setFileName, t])
+
   useEffect(() => {
     if (!isFullscreen) return
     const handleKeydown = (event) => {
@@ -227,6 +323,21 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
     document.addEventListener('keydown', handleKeydown)
     return () => document.removeEventListener('keydown', handleKeydown)
   }, [isFullscreen])
+
+  useEffect(() => {
+    if (!isUrlOverlayOpen) return
+    const handleKeydown = (event) => {
+      if (event.key === 'Escape') {
+        setIsUrlOverlayOpen(false)
+        setUrlInput('')
+      } else if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault()
+        handleUrlSubmit()
+      }
+    }
+    document.addEventListener('keydown', handleKeydown)
+    return () => document.removeEventListener('keydown', handleKeydown)
+  }, [isUrlOverlayOpen, handleUrlSubmit])
 
   useEffect(() => {
     // Chỉ check và load example 1 lần duy nhất khi component mount
@@ -281,18 +392,6 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
   const handleFormat = useCallback(() => {
     setBeautyDropdownOpen(!beautyDropdownOpen)
   }, [beautyDropdownOpen])
-
-  const handleLoadFromUrl = useCallback(async () => {
-    if (!onLoadUrl) return
-    const url = prompt(t('input.loadUrlPrompt') || 'Nhập URL HTML')
-    if (!url) return
-    setIsUrlLoading(true)
-    try {
-      await onLoadUrl(url.trim())
-    } finally {
-      setIsUrlLoading(false)
-    }
-  }, [onLoadUrl, t])
 
   const handleSnapshotSelect = useCallback((snapshot) => {
     if (!snapshot) return
@@ -475,20 +574,18 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
               <Upload size={12} strokeWidth={2} className="sm:w-3.5 sm:h-3.5 flex-shrink-0" />
         {renderButtonLabel('upload', t('input.upload'))}
             </motion.button>
-            {onLoadUrl && (
-              <motion.button 
-                className={`${baseButtonClass} ${isCompactToolbar ? stackedButtonClass : ''}`}
-                onClick={handleLoadFromUrl}
-                title={t('input.loadUrlTooltip')}
-                onMouseEnter={() => setHoveredButton('url')}
-                onMouseLeave={() => setHoveredButton(null)}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Link2 size={12} strokeWidth={2} className="sm:w-3.5 sm:h-3.5 flex-shrink-0" />
-          {renderButtonLabel('url', t('input.loadUrl'))}
-              </motion.button>
-            )}
+            <motion.button 
+              className={`${baseButtonClass} ${isCompactToolbar ? stackedButtonClass : ''}`}
+              onClick={handleLoadFromUrl}
+              title={t('input.loadUrlTooltip')}
+              onMouseEnter={() => setHoveredButton('url')}
+              onMouseLeave={() => setHoveredButton(null)}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Link2 size={12} strokeWidth={2} className="sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+              {renderButtonLabel('url', t('input.loadUrl'))}
+            </motion.button>
             {onLoadClipboard && (
               <motion.button 
           className={`${baseButtonClass} ${isCompactToolbar ? stackedButtonClass : ''}`}
@@ -839,6 +936,109 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
           </motion.div>
         )}
       </div>
+      
+      {/* URL Input Overlay */}
+      <AnimatePresence>
+        {isUrlOverlayOpen && (
+          <motion.div
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setIsUrlOverlayOpen(false)
+                setUrlInput('')
+              }
+            }}
+          >
+            <motion.div
+              className="bg-bw-white dark:bg-bw-gray-2 border border-bw-gray-d dark:border-bw-gray-3 rounded-md shadow-xl p-4 sm:p-6 w-full max-w-md mx-4"
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-bw-black dark:text-bw-white">
+                  {t('input.loadUrl')}
+                </h3>
+                <button
+                  onClick={() => {
+                    setIsUrlOverlayOpen(false)
+                    setUrlInput('')
+                  }}
+                  className="text-bw-gray-6 hover:text-bw-black dark:text-bw-gray-5 dark:hover:text-bw-white transition-colors"
+                >
+                  <X size={20} strokeWidth={2} />
+                </button>
+              </div>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-bw-black dark:text-bw-white mb-2">
+                    {t('input.loadUrlPrompt')}
+                  </label>
+                  <input
+                    type="text"
+                    value={urlInput}
+                    onChange={(e) => setUrlInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault()
+                        handleUrlSubmit()
+                      }
+                    }}
+                    placeholder={t('input.urlPlaceholder')}
+                    className="w-full px-3 py-2 border border-bw-gray-d dark:border-bw-gray-3 rounded-sm bg-bw-white dark:bg-bw-gray-3 text-bw-black dark:text-bw-white text-sm focus:outline-none focus:ring-2 focus:ring-bw-black dark:focus:ring-bw-white"
+                    autoFocus
+                  />
+                </div>
+                
+                <div className="text-xs text-bw-gray-6 dark:text-bw-gray-5 space-y-1">
+                  <p>• {t('input.urlFileHint')}</p>
+                  <p>• {t('input.urlWebsiteHint')}</p>
+                </div>
+                
+                <div className="flex items-center gap-2 pt-2">
+                  <motion.button
+                    onClick={handleUrlSubmit}
+                    disabled={isUrlLoading || !urlInput.trim()}
+                    className="flex-1 px-4 py-2 bg-bw-black text-bw-white rounded-sm text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    whileHover={!isUrlLoading && urlInput.trim() ? { backgroundColor: '#333333' } : {}}
+                    whileTap={!isUrlLoading && urlInput.trim() ? { scale: 0.95 } : {}}
+                  >
+                      {isUrlLoading ? (
+                        <>
+                          <Loader size={16} className="animate-spin" />
+                          <span>{t('input.loading')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Link2 size={16} strokeWidth={2} />
+                          <span>{t('input.load')}</span>
+                        </>
+                      )}
+                  </motion.button>
+                  <motion.button
+                    onClick={() => {
+                      setIsUrlOverlayOpen(false)
+                      setUrlInput('')
+                    }}
+                    disabled={isUrlLoading}
+                    className="px-4 py-2 bg-bw-gray-f dark:bg-bw-gray-3 text-bw-black dark:text-bw-white border border-bw-gray-d dark:border-bw-gray-3 rounded-sm text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    whileHover={!isUrlLoading ? { backgroundColor: '#f5f5f5' } : {}}
+                    whileTap={!isUrlLoading ? { scale: 0.95 } : {}}
+                  >
+                    {t('common.cancel')}
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }

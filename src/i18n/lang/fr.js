@@ -1,6 +1,7 @@
 export default {
     // Common
     'common.more': 'Plus',
+    'common.cancel': 'Annuler',
     'editor.fullscreen': 'Plein écran',
     'editor.exitFullscreen': 'Quitter le plein écran',
     'editor.readOnly': 'Lecture seule',
@@ -19,7 +20,11 @@ export default {
     'input.upload': 'Téléverser un fichier',
     'input.loadUrl': 'Charger depuis une URL',
     'input.loadUrlTooltip': 'Entrez une URL pour récupérer du HTML',
-    'input.loadUrlPrompt': 'Collez l’URL contenant le HTML à charger',
+    'input.loadUrlPrompt': 'Entrez l’URL HTML ou le lien du site web',
+    'input.load': 'Charger',
+    'input.urlPlaceholder': 'https://example.com/file.html ou https://example.com',
+    'input.urlFileHint': 'Lien de fichier (.html, .htm, .txt): Télécharger le fichier directement',
+    'input.urlWebsiteHint': 'Lien du site web: Obtenir le HTML complet de la page',
     'input.loadClipboard': 'Coller depuis le presse-papiers',
     'input.loadClipboardTooltip': 'Lire le HTML depuis le presse-papiers',
     'input.download': 'Télécharger',
@@ -46,9 +51,9 @@ export default {
     // Process button
     'process.button': 'Traiter',
     'process.buttonProcessing': 'Traitement...',
-    'process.autoToggle': 'Aperçu automatique',
-    'process.autoOn': 'S’exécute après une pause de saisie',
-    'process.autoOff': 'S’exécute uniquement en appuyant sur Traiter',
+    'process.autoToggle': 'Traitement automatique',
+    'process.autoOn': 'S\'exécute après une pause de saisie',
+    'process.autoOff': 'S\'exécute uniquement en appuyant sur Traiter',
     'process.autoDelayLabel': 'Délai : {value}ms',
   
     // Preview section
@@ -102,7 +107,10 @@ export default {
     'toast.snapshotStorageWarning': 'Stockage presque plein. Les anciens instantanés ont été supprimés.',
     'toast.networkUnblocked': 'Protection réseau désactivée – le HTML peut maintenant effectuer des requêtes externes.',
     'toast.loadedFromUrl': 'HTML chargé depuis {url}',
-    'toast.loadFromUrlError': 'Impossible de charger le HTML depuis l’URL. Veuillez réessayer.',
+    'toast.loadedFromUrlFile': 'Fichier chargé avec succès',
+    'toast.loadedFromUrlWebsite': 'HTML du site web chargé avec succès',
+    'toast.loadFromUrlError': 'Échec du chargement de l’URL. Peut être dû à CORS ou URL invalide.',
+    'toast.urlEmpty': 'L’URL ne peut pas être vide',
     'toast.loadedFromClipboard': 'HTML collé depuis le presse-papiers',
     'toast.clipboardUnsupported': 'API du presse-papiers non disponible dans ce navigateur',
     'toast.clipboardEmpty': 'Le presse-papiers est vide',
