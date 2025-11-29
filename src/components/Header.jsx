@@ -55,6 +55,8 @@ export default function Header({ darkMode, toggleDarkMode }) {
             src="/assets/logo.png"
             alt="KhanhNguyen9872"
             className="w-full h-full object-contain"
+            loading="eager"
+            fetchpriority="high"
           />
         </motion.button>
         <motion.h1 

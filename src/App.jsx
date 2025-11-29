@@ -3,17 +3,17 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { Play, Loader, Sliders } from 'react-feather'
 import { useI18n } from './i18n/I18nContext'
-import Header from './components/Header'
 import PreviewSkeleton from './components/PreviewSkeleton'
 import DelayedSuspense from './components/DelayedSuspense'
 
-// Lazy load các component lớn
+// Lazy load các component lớn và Header
+const Header = lazy(() => import('./components/Header'))
 const InputEditor = lazy(() => import('./components/InputEditor'))
 const Preview = lazy(() => import('./components/Preview'))
 const OutputEditor = lazy(() => import('./components/OutputEditor'))
 
 const SNAPSHOT_LIMIT = 10
-const DEFAULT_CUSTOM_SIZE = { width: 1200, height: 800 }
+const DEFAULT_CUSTOM_SIZE = { width: 1200, height: 500 }
 
 const loadStoredCustomSize = () => {
   try {
@@ -67,8 +67,8 @@ function App() {
   })
   const [debounceDelay, setDebounceDelay] = useState(() => {
     const saved = localStorage.getItem('auto-preview-delay')
-    const parsed = saved ? parseInt(saved, 10) : 800
-    if (Number.isNaN(parsed)) return 800
+    const parsed = saved ? parseInt(saved, 10) : 500
+    if (Number.isNaN(parsed)) return 500
     return Math.min(1500, Math.max(300, parsed))
   })
   const [snapshots, setSnapshots] = useState(() => {
@@ -340,13 +340,15 @@ function App() {
       animate="visible"
       variants={containerVariants}
     >
-      <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+      <Suspense fallback={<div className="h-16 bg-bw-black"></div>}>
+        <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+      </Suspense>
       
       <motion.div 
         className="flex flex-col flex-1 gap-3 sm:gap-4 p-2 sm:p-4"
         variants={containerVariants}
       >
-        <DelayedSuspense fallback={<PreviewSkeleton />} delay={800}>
+        <DelayedSuspense fallback={<PreviewSkeleton />} delay={500}>
           <InputEditor 
           html={html}
           setHtml={setHtml}
@@ -452,7 +454,7 @@ function App() {
           )}
         </motion.div>
         
-        <DelayedSuspense fallback={<PreviewSkeleton />} delay={800}>
+        <DelayedSuspense fallback={<PreviewSkeleton />} delay={500}>
           <OutputEditor
             outputHtml={outputHtml}
             setOutputHtml={setOutputHtml}
@@ -466,7 +468,7 @@ function App() {
           />
         </DelayedSuspense>
 
-        <DelayedSuspense fallback={<PreviewSkeleton />} delay={800}>
+        <DelayedSuspense fallback={<PreviewSkeleton />} delay={500}>
           <Preview
             html={previewHtml}
             reloadKey={previewNonce}

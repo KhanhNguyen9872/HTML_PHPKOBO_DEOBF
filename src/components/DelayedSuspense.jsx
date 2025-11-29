@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 export default function DelayedSuspense({ 
   children, 
   fallback, 
-  delay = 800 
+  delay = 500 
 }) {
   const [showContent, setShowContent] = useState(false)
   const resolvedRef = useRef(false)

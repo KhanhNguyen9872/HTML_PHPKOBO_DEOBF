@@ -68,12 +68,35 @@ export default defineConfig({
     minify: 'esbuild',
     rollupOptions: {
       output: {
-        manualChunks: undefined, // Tắt manual chunks, gom tất cả vào một file
-        inlineDynamicImports: true // Gom tất cả dynamic imports vào một chunk
+        // Code splitting để tối ưu loading
+        manualChunks: (id) => {
+          // Tách vendor chunks
+          if (id.includes('node_modules')) {
+            if (id.includes('monaco-editor')) {
+              return 'monaco'
+            }
+            if (id.includes('framer-motion')) {
+              return 'framer-motion'
+            }
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor'
+            }
+            if (id.includes('sonner')) {
+              return 'sonner'
+            }
+            return 'vendor'
+          }
+        },
+        // Preload critical chunks
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
       }
     },
     // Copy Monaco Editor assets vào build output
-    copyPublicDir: true
+    copyPublicDir: true,
+    // Tối ưu chunk size
+    chunkSizeWarningLimit: 1000
   },
   // Cấu hình để Monaco Editor sử dụng local paths
   optimizeDeps: {
