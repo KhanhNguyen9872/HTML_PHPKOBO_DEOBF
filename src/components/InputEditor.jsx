@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import LazyMonacoEditor from './LazyMonacoEditor'
 import VirtualizedList from './VirtualizedList'
 import axios from 'axios'
-import { Upload, Download, Copy, Trash2, Code, AlertCircle, CheckCircle, X, Clock, Loader, XCircle, Link2, Clipboard, MoreHorizontal, Maximize2, Minimize2 } from 'react-feather'
+import { Upload, Download, Copy, Trash2, Code, AlertCircle, CheckCircle, X, Clock, RefreshCw, XCircle, Link2, Clipboard, MoreHorizontal, Maximize2, Minimize2 } from 'react-feather'
 import { useI18n } from '../i18n/I18nContext'
 import { html_beautify, css_beautify, js_beautify } from 'js-beautify'
 
@@ -860,7 +860,7 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
                 exit={{ opacity: 0, x: -10 }}
                 transition={{ duration: 0.2 }}
               >
-                <Loader size={12} className="animate-spin" />
+                <RefreshCw size={12} className="animate-spin" />
                 {t('input.exampleLoading')}
               </motion.span>
             )}
@@ -938,7 +938,7 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <Loader size={28} className="animate-spin text-bw-black dark:text-bw-white" />
+            <RefreshCw size={28} className="animate-spin text-bw-black dark:text-bw-white" />
             <span className="text-xs sm:text-sm font-medium text-bw-black dark:text-bw-white">
               {loadingOverlayText}
             </span>
@@ -1020,7 +1020,7 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
                   >
                       {isUrlLoading ? (
                         <>
-                          <Loader size={16} className="animate-spin" />
+                          <RefreshCw size={16} className="animate-spin" />
                           <span>{t('input.loading')}</span>
                         </>
                       ) : (
