@@ -206,7 +206,7 @@ export default function Preview({
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
               >
-                <label className="flex items-center gap-2 text-xs text-bw-gray-8 dark:text-bw-gray-2 font-light">
+                <label className="flex items-center gap-2 text-xs text-bw-black dark:text-bw-gray-d font-light">
                   {t('preview.width')}: 
                   <input
                     type="number"
@@ -227,7 +227,7 @@ export default function Preview({
                   />
                   px
                 </label>
-                <label className="flex items-center gap-2 text-xs text-bw-gray-8 dark:text-bw-gray-2 font-light">
+                <label className="flex items-center gap-2 text-xs text-bw-black dark:text-bw-gray-d font-light">
                   {t('preview.height')}: 
                   <input
                     type="number"
