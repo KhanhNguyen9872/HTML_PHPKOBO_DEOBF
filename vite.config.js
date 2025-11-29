@@ -77,7 +77,7 @@ export default defineConfig({
   },
   // Cấu hình để Monaco Editor sử dụng local paths
   optimizeDeps: {
-    include: ['monaco-editor']
+    exclude: ['monaco-editor']
   }
 })
 

@@ -224,8 +224,9 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
   const fullscreenButtonLabel = useMemo(() => isFullscreen ? t('editor.exitFullscreen') : t('editor.fullscreen'), [isFullscreen, t])
   const heightClasses = 'h-[600px] sm:h-[500px] md:h-[400px] lg:h-[500px] xl:h-[600px]'
   const baseContainerClasses = 'flex flex-col border border-bw-gray-d dark:border-bw-gray-3 rounded-sm overflow-hidden bg-bw-white dark:bg-bw-gray-2 shadow-sm transition-all'
-  const wrapperClasses = isFullscreen ? 'fixed inset-0 z-[60] p-2 sm:p-4 bg-bw-gray-1 dark:bg-bw-gray-1' : 'relative'
-  const containerClass = useMemo(() => `${wrapperClasses} ${baseContainerClasses} ${isFullscreen ? 'h-auto min-h-screen' : heightClasses}`, [wrapperClasses, isFullscreen])
+  const fullscreenWrapperClasses = 'fixed inset-0 z-[60] p-2 sm:p-4 bg-bw-gray-1 dark:bg-bw-gray-1'
+  const normalWrapperClasses = 'relative'
+  const containerClass = `${isFullscreen ? fullscreenWrapperClasses : normalWrapperClasses} ${baseContainerClasses} ${isFullscreen ? 'h-auto min-h-screen' : heightClasses}`
 
   const editorOptions = useMemo(() => ({
     minimap: { enabled: false },
@@ -410,7 +411,7 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
 
   return (
     <motion.div 
-      className={`${containerClass} relative`}
+      className={containerClass}
       variants={itemVariants}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -418,9 +419,9 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
       whileHover={{ boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
       transition={{ duration: 0.3, ease: [0.6, -0.05, 0.01, 0.99] }}
     >
-      {notRunYet && (
+      {notRunYet && !isFullscreen && (
         <motion.div
-          className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-bw-white dark:bg-bw-gray-2 z-50"
+          className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-bw-white dark:bg-bw-gray-2 z-50 pointer-events-none"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

@@ -8,8 +8,8 @@ import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ErrorBoundary>
-      <I18nProvider>
+    <I18nProvider>
+      <ErrorBoundary>
         <App />
         <Toaster 
           position="top-right"
@@ -25,8 +25,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             className: 'toast-custom',
           }}
         />
-      </I18nProvider>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </I18nProvider>
   </React.StrictMode>,
 )
 
