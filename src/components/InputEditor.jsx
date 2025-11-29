@@ -230,6 +230,54 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
     }, 100)
   }, [])
 
+  const fetchWithProxy = useCallback(async (targetUrl) => {
+    // Thử fetch trực tiếp trước
+    try {
+      const response = await fetch(targetUrl)
+      if (response.ok) {
+        return await response.text()
+      }
+    } catch (directError) {
+      // Nếu gặp CORS, dùng proxy
+      console.warn('Direct fetch failed, trying proxy:', directError)
+    }
+
+    // Dùng proxy local (Vercel serverless function)
+    try {
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent(targetUrl)}`
+      const proxyResponse = await fetch(proxyUrl)
+      
+      if (!proxyResponse.ok) {
+        throw new Error(`Proxy HTTP ${proxyResponse.status}`)
+      }
+      
+      const proxyData = await proxyResponse.json()
+      
+      if (!proxyData.contents) {
+        throw new Error('No content from proxy')
+      }
+      
+      return proxyData.contents
+    } catch (localProxyError) {
+      // Fallback về allorigins nếu proxy local fail
+      console.warn('Local proxy failed, trying allorigins:', localProxyError)
+      const alloriginsUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`
+      const alloriginsResponse = await fetch(alloriginsUrl)
+      
+      if (!alloriginsResponse.ok) {
+        throw new Error(`AllOrigins HTTP ${alloriginsResponse.status}`)
+      }
+      
+      const alloriginsData = await alloriginsResponse.json()
+      
+      if (!alloriginsData.contents) {
+        throw new Error('No content from AllOrigins')
+      }
+      
+      return alloriginsData.contents
+    }
+  }, [])
+
   const handleUrlSubmit = useCallback(async () => {
     const url = urlInput.trim()
     if (!url) {
@@ -246,58 +294,15 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
       // Kiểm tra xem URL có phải là file download không (kết thúc bằng .html, .htm, .txt)
       const isFileUrl = /\.(html|htm|txt)(\?.*)?$/i.test(url)
       
+      const htmlContent = await fetchWithProxy(url)
+      setHtml(htmlContent)
+      
       if (isFileUrl) {
-        // Tải file trực tiếp, nếu gặp CORS thì dùng proxy
-        try {
-          const response = await fetch(url)
-          if (!response.ok) {
-            throw new Error('Failed to fetch file')
-          }
-          const text = await response.text()
-          setHtml(text)
-          setFileName(url.split('/').pop().split('?')[0] || 'input.html')
-          toast.success(t('toast.loadedFromUrlFile'), {
-            icon: <CheckCircle size={18} strokeWidth={2} />
-          })
-        } catch (fileError) {
-          // Nếu gặp CORS với file, dùng proxy
-          console.warn('Direct fetch failed, trying proxy:', fileError)
-          const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
-          const proxyResponse = await fetch(proxyUrl)
-          
-          if (!proxyResponse.ok) {
-            throw new Error(`Proxy HTTP ${proxyResponse.status}`)
-          }
-          
-          const proxyData = await proxyResponse.json()
-          
-          if (!proxyData.contents) {
-            throw new Error('No content from proxy')
-          }
-          
-          setHtml(proxyData.contents)
-          setFileName(url.split('/').pop().split('?')[0] || 'input.html')
-          toast.success(t('toast.loadedFromUrlFile'), {
-            icon: <CheckCircle size={18} strokeWidth={2} />
-          })
-        }
+        setFileName(url.split('/').pop().split('?')[0] || 'input.html')
+        toast.success(t('toast.loadedFromUrlFile'), {
+          icon: <CheckCircle size={18} strokeWidth={2} />
+        })
       } else {
-        // Fetch HTML của website - dùng proxy ngay vì thường gặp CORS
-        // Thử dùng proxy CORS
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
-        const proxyResponse = await fetch(proxyUrl)
-        
-        if (!proxyResponse.ok) {
-          throw new Error(`Proxy HTTP ${proxyResponse.status}`)
-        }
-        
-        const proxyData = await proxyResponse.json()
-        
-        if (!proxyData.contents) {
-          throw new Error('No content from proxy')
-        }
-        
-        setHtml(proxyData.contents)
         setFileName(null)
         toast.success(t('toast.loadedFromUrlWebsite'), {
           icon: <CheckCircle size={18} strokeWidth={2} />
@@ -312,7 +317,7 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
       setIsUrlLoading(false)
       setUrlInput('')
     }
-  }, [urlInput, setHtml, setFileName, t])
+  }, [urlInput, setHtml, setFileName, t, fetchWithProxy])
 
   useEffect(() => {
     if (!isFullscreen) return
