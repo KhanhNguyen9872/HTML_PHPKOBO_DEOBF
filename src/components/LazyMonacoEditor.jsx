@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState, useEffect } from 'react'
 
 // Lazy load icons và monaco config
-const LoaderIcon = lazy(() => import('react-feather').then(m => ({ default: m.Loader })))
+const LoaderIcon = lazy(() => import('react-feather').then(m => ({ default: m.RefreshCw })))
 
 // Lazy load monaco config
 let monacoConfigLoaded = false

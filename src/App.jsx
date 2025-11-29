@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
+import { RefreshCw } from 'react-feather'
 import { useI18n } from './i18n/I18nContext'
 import PreviewSkeleton from './components/PreviewSkeleton'
 import DelayedSuspense from './components/DelayedSuspense'
 
 // Lazy load icons
 const PlayIcon = lazy(() => import('react-feather').then(m => ({ default: m.Play })))
-const LoaderIcon = lazy(() => import('react-feather').then(m => ({ default: m.Loader })))
+const LoaderIcon = lazy(() => import('react-feather').then(m => ({ default: m.RefreshCw })))
 const SlidersIcon = lazy(() => import('react-feather').then(m => ({ default: m.Sliders })))
 
 // Lazy load các component lớn và Header
@@ -224,7 +225,7 @@ function App() {
 
     if (showToast) {
       toast(t('toast.processing'), {
-        icon: <Loader size={16} className="animate-spin" />
+        icon: <RefreshCw size={16} className="animate-spin" />
       })
     }
     return true

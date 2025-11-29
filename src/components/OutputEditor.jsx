@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import LazyMonacoEditor from './LazyMonacoEditor'
-import { Download, Copy, Trash2, Code, Loader, MoreHorizontal, Maximize2, Minimize2 } from 'react-feather'
+import { Download, Copy, Trash2, Code, RefreshCw, MoreHorizontal, Maximize2, Minimize2 } from 'react-feather'
 import { useI18n } from '../i18n/I18nContext'
 import { html_beautify, css_beautify, js_beautify } from 'js-beautify'
 
@@ -506,7 +506,7 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <Loader size={28} className="animate-spin text-bw-black dark:text-bw-white" />
+            <RefreshCw size={28} className="animate-spin text-bw-black dark:text-bw-white" />
             <span className="text-xs sm:text-sm font-medium text-bw-black dark:text-bw-white">{overlayText}</span>
           </motion.div>
         )}
