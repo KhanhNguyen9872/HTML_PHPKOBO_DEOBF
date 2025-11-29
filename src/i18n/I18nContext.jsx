@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react'
 import { translations, availableLanguages } from './translations'
 
 const I18nContext = createContext()
@@ -28,7 +28,7 @@ export const I18nProvider = ({ children }) => {
     localStorage.setItem('language', language)
   }, [language])
 
-  const t = (key, params = {}) => {
+  const t = useCallback((key, params = {}) => {
     let translation = translations[language]?.[key] || key
     
     // Replace params in translation
@@ -37,7 +37,7 @@ export const I18nProvider = ({ children }) => {
     })
     
     return translation
-  }
+  }, [language])
 
   const changeLanguage = (lang) => {
     setLanguage(lang)

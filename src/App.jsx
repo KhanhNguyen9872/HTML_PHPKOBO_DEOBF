@@ -1,10 +1,14 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
-import { Play, Loader, Sliders } from 'react-feather'
 import { useI18n } from './i18n/I18nContext'
 import PreviewSkeleton from './components/PreviewSkeleton'
 import DelayedSuspense from './components/DelayedSuspense'
+
+// Lazy load icons
+const PlayIcon = lazy(() => import('react-feather').then(m => ({ default: m.Play })))
+const LoaderIcon = lazy(() => import('react-feather').then(m => ({ default: m.Loader })))
+const SlidersIcon = lazy(() => import('react-feather').then(m => ({ default: m.Sliders })))
 
 // Lazy load các component lớn và Header
 const Header = lazy(() => import('./components/Header'))
@@ -405,11 +409,13 @@ function App() {
             whileTap={!isProcessing && html && html.trim() !== '' ? { scale: 0.95 } : {}}
             transition={{ duration: 0.2 }}
           >
-            {isProcessing ? (
-              <Loader size={14} strokeWidth={2.5} className="sm:w-4 sm:h-4 animate-spin" />
-            ) : (
-              <Play size={14} strokeWidth={2} className="sm:w-4 sm:h-4" />
-            )}
+            <Suspense fallback={<div className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}>
+              {isProcessing ? (
+                <LoaderIcon size={14} strokeWidth={2.5} className="sm:w-4 sm:h-4 animate-spin" />
+              ) : (
+                <PlayIcon size={14} strokeWidth={2} className="sm:w-4 sm:h-4" />
+              )}
+            </Suspense>
             {isProcessing ? t('process.buttonProcessing') : t('process.button')}
           </motion.button>
           <div className="group flex flex-col items-center gap-1">
@@ -438,7 +444,9 @@ function App() {
           {autoPreview && (
             <div className="flex flex-col items-center gap-1 text-[10px] sm:text-xs text-bw-gray-7 dark:text-bw-gray-7">
               <div className="flex items-center gap-2">
-                <Sliders size={12} className="text-bw-gray-6 dark:text-bw-gray-5" />
+                <Suspense fallback={<div className="w-3 h-3" />}>
+                  <SlidersIcon size={12} className="text-bw-gray-6 dark:text-bw-gray-5" />
+                </Suspense>
                 <input
                   type="range"
                   min="300"
