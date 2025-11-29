@@ -231,50 +231,27 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
   }, [])
 
   const fetchWithProxy = useCallback(async (targetUrl) => {
-    // Thử fetch trực tiếp trước
-    try {
-      const response = await fetch(targetUrl)
-      if (response.ok) {
-        return await response.text()
-      }
-    } catch (directError) {
-      // Nếu gặp CORS, dùng proxy
-      console.warn('Direct fetch failed, trying proxy:', directError)
-    }
-
     // Dùng proxy local (Vercel serverless function)
     try {
       const proxyUrl = `/api/proxy?url=${encodeURIComponent(targetUrl)}`
-      const proxyResponse = await fetch(proxyUrl)
+      const proxyResponse = await axios.get(proxyUrl)
       
-      if (!proxyResponse.ok) {
-        throw new Error(`Proxy HTTP ${proxyResponse.status}`)
-      }
-      
-      const proxyData = await proxyResponse.json()
-      
-      if (!proxyData.contents) {
+      if (!proxyResponse.data.contents) {
         throw new Error('No content from proxy')
       }
       
-      return proxyData.contents
+      return proxyResponse.data.contents
     } catch (localProxyError) {
       // Fallback về allorigins nếu proxy local fail
       console.warn('Local proxy failed, trying allorigins:', localProxyError)
       const alloriginsUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`
-      const alloriginsResponse = await fetch(alloriginsUrl)
+      const alloriginsResponse = await axios.get(alloriginsUrl)
       
-      if (!alloriginsResponse.ok) {
-        throw new Error(`AllOrigins HTTP ${alloriginsResponse.status}`)
-      }
-      
-      const alloriginsData = await alloriginsResponse.json()
-      
-      if (!alloriginsData.contents) {
+      if (!alloriginsResponse.data.contents) {
         throw new Error('No content from AllOrigins')
       }
       
-      return alloriginsData.contents
+      return alloriginsResponse.data.contents
     }
   }, [])
 

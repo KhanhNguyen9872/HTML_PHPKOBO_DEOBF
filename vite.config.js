@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import JavaScriptObfuscator from 'javascript-obfuscator'
 import path from 'path'
+import axios from 'axios'
 
 // Plugin để handle proxy API trong dev mode
 const proxyApiPlugin = () => ({
@@ -31,37 +32,37 @@ const proxyApiPlugin = () => ({
           return
         }
 
-        const response = await fetch(targetUrl, {
+        const response = await axios.get(targetUrl, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': 'en-US,en;q=0.9',
           },
-          redirect: 'follow',
+          maxRedirects: 5,
+          responseType: 'text',
+          validateStatus: (status) => status < 500,
         })
-
-        if (!response.ok) {
-          res.statusCode = response.status
-          res.end(JSON.stringify({ error: `Failed to fetch: ${response.statusText}` }))
-          return
-        }
-
-        const text = await response.text()
 
         res.setHeader('Access-Control-Allow-Origin', '*')
         res.setHeader('Access-Control-Allow-Methods', 'GET')
         res.setHeader('Content-Type', 'application/json')
         res.end(JSON.stringify({ 
-          contents: text,
+          contents: response.data,
           status: {
             url: targetUrl,
-            content_type: response.headers.get('content-type'),
+            content_type: response.headers['content-type'],
             http_code: response.status
           }
         }))
       } catch (error) {
-        res.statusCode = 500
-        res.end(JSON.stringify({ error: error.message || 'Internal server error' }))
+        // Xử lý lỗi từ axios
+        if (error.response) {
+          res.statusCode = error.response.status
+          res.end(JSON.stringify({ error: `Failed to fetch: ${error.response.statusText}` }))
+        } else {
+          res.statusCode = 500
+          res.end(JSON.stringify({ error: error.message || 'Internal server error' }))
+        }
       }
     })
   }
