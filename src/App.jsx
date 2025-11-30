@@ -5,6 +5,10 @@ import { RefreshCw } from 'react-feather'
 import { useI18n } from './i18n/I18nContext'
 import PreviewSkeleton from './components/PreviewSkeleton'
 import DelayedSuspense from './components/DelayedSuspense'
+import ErrorTestPage from './components/ErrorTestPage'
+import DarkModeTransition from './components/DarkModeTransition'
+import LanguageTransition from './components/LanguageTransition'
+import CustomLayoutEditor from './components/CustomLayoutEditor'
 
 // Lazy load icons
 const PlayIcon = lazy(() => import('react-feather').then(m => ({ default: m.Play })))
@@ -13,6 +17,7 @@ const SlidersIcon = lazy(() => import('react-feather').then(m => ({ default: m.S
 
 // Lazy load các component lớn và Header
 const Header = lazy(() => import('./components/Header'))
+const Footer = lazy(() => import('./components/Footer'))
 const InputEditor = lazy(() => import('./components/InputEditor'))
 const Preview = lazy(() => import('./components/Preview'))
 const OutputEditor = lazy(() => import('./components/OutputEditor'))
@@ -41,7 +46,10 @@ const loadStoredCustomSize = () => {
 }
 
 function App() {
-  const { t } = useI18n()
+  const { t, language, changeLanguage, availableLanguages } = useI18n()
+  const [showErrorTest, setShowErrorTest] = useState(false)
+  const [isLanguageTransitioning, setIsLanguageTransitioning] = useState(false)
+  const [newLanguageCode, setNewLanguageCode] = useState(null)
   const [html, setHtml] = useState(() => {
     const saved = localStorage.getItem('html-editor-content')
     return saved || ''
@@ -62,6 +70,30 @@ function App() {
     const saved = localStorage.getItem('dark-mode')
     return saved ? saved === 'true' : false
   })
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [layoutMode, setLayoutMode] = useState(() => {
+    const saved = localStorage.getItem('layout-mode')
+    return saved || 'default'
+  })
+  const [customLayoutOrder, setCustomLayoutOrder] = useState(() => {
+    const saved = localStorage.getItem('custom-layout-order')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed) && parsed.length === 3) {
+          return parsed
+        }
+      } catch (e) {
+        // Use default
+      }
+    }
+    return [
+      { id: 'input', name: 'Input', order: 0 },
+      { id: 'output', name: 'Output', order: 1 },
+      { id: 'preview', name: 'Preview', order: 2 }
+    ]
+  })
+  const [isCustomLayoutEditorOpen, setIsCustomLayoutEditorOpen] = useState(false)
   const [autoPreview, setAutoPreview] = useState(() => {
     const saved = localStorage.getItem('auto-preview')
     return saved ? saved === 'true' : false
@@ -121,6 +153,19 @@ function App() {
   }, [autoPreview])
 
   useEffect(() => {
+    localStorage.setItem('layout-mode', layoutMode)
+  }, [layoutMode])
+
+  const handleCustomLayoutSave = (newOrder) => {
+    setCustomLayoutOrder(newOrder)
+    setLayoutMode('custom')
+  }
+
+  const handleLayoutChange = (newLayout) => {
+    setLayoutMode(newLayout)
+  }
+
+  useEffect(() => {
     localStorage.setItem('auto-preview-delay', debounceDelay.toString())
   }, [debounceDelay])
 
@@ -134,7 +179,38 @@ function App() {
   }, [customWidth, customHeight])
 
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode)
+    const newDarkMode = !darkMode
+    setIsTransitioning(true)
+    // Đổi theme ở 40-50% animation (0.3s trong tổng 0.7s)
+    setTimeout(() => {
+      setDarkMode(newDarkMode)
+    }, 650)
+    // Kết thúc animation sau 0.7s
+    setTimeout(() => {
+      setIsTransitioning(false)
+    }, 1300)
+  }
+
+  const handleLanguageChange = (newLangCode) => {
+    if (newLangCode === language) return
+    
+    // Set cả hai state cùng lúc để trigger animation
+    setNewLanguageCode(newLangCode)
+    setIsLanguageTransitioning(true)
+    
+    // Đổi ngôn ngữ ở 40-50% animation (0.3s trong tổng 0.7s)
+    setTimeout(() => {
+      changeLanguage(newLangCode)
+    }, 300)
+    
+    // Kết thúc animation sau 0.7s
+    setTimeout(() => {
+      setIsLanguageTransitioning(false)
+      // Đợi exit animation hoàn thành trước khi clear newLanguageCode
+      setTimeout(() => {
+        setNewLanguageCode(null)
+      }, 200)
+    }, 700)
   }
 
   useEffect(() => {
@@ -314,6 +390,296 @@ function App() {
     }
   }
 
+  // Check if screen is desktop size (>= 1024px)
+  const [isDesktop, setIsDesktop] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024
+    }
+    return true
+  })
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Render layout content based on layout mode
+  const renderLayoutContent = () => {
+    // Force default layout on mobile/tablet
+    const effectiveLayoutMode = isDesktop ? layoutMode : 'default'
+    const processButtons = (
+      <motion.div
+        key="process"
+        className="flex flex-col lg:flex-row items-center justify-center gap-2 sm:gap-4 py-2 sm:py-4"
+        variants={itemVariants}
+      >
+        <motion.button
+          className="px-4 sm:px-6 py-2 sm:py-3 bg-bw-black text-bw-white border border-bw-black rounded-sm cursor-pointer text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleProcess}
+          disabled={isProcessing || !html || html.trim() === ''}
+          whileHover={!isProcessing && html && html.trim() !== '' ? { backgroundColor: '#333333', borderColor: '#333333' } : {}}
+          whileTap={!isProcessing && html && html.trim() !== '' ? { scale: 0.95 } : {}}
+          transition={{ duration: 0.2 }}
+        >
+          <Suspense fallback={<div className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}>
+            {isProcessing ? (
+              <LoaderIcon size={14} strokeWidth={2.5} className="sm:w-4 sm:h-4 animate-spin" />
+            ) : (
+              <PlayIcon size={14} strokeWidth={2} className="sm:w-4 sm:h-4" />
+            )}
+          </Suspense>
+          {isProcessing ? t('process.buttonProcessing') : t('process.button')}
+        </motion.button>
+        <div className="group flex flex-col items-center gap-1">
+          <motion.button
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 border rounded-sm text-xs sm:text-sm font-medium transition-colors ${
+              autoPreview
+                ? 'bg-bw-black text-bw-white border-bw-black'
+                : 'bg-bw-white text-bw-black border-bw-gray-d dark:bg-bw-gray-3 dark:text-bw-white dark:border-bw-gray-3'
+            }`}
+            onClick={() => setAutoPreview((prev) => !prev)}
+            whileTap={{ scale: 0.96 }}
+          >
+            <span className="relative inline-flex w-8 h-4 rounded-full border border-current transition-colors">
+              <span
+                className={`absolute top-[2px] w-3 h-3 rounded-full bg-current transition-transform ${
+                  autoPreview ? 'translate-x-[20px]' : 'translate-x-0'
+                }`}
+              />
+            </span>
+            <span>{t('process.autoToggle')}</span>
+          </motion.button>
+          <span className="text-[10px] uppercase tracking-wide text-bw-gray-6 dark:text-bw-gray-5 opacity-0 group-hover:opacity-100 transition-opacity">
+            {autoPreview ? t('process.autoOn') : t('process.autoOff')}
+          </span>
+        </div>
+        {autoPreview && (
+          <div className="flex flex-col items-center gap-1 text-[10px] sm:text-xs text-bw-gray-7 dark:text-bw-gray-7">
+            <div className="flex items-center gap-2">
+              <Suspense fallback={<div className="w-3 h-3" />}>
+                <SlidersIcon size={12} className="text-bw-gray-6 dark:text-bw-gray-5" />
+              </Suspense>
+              <input
+                type="range"
+                min="300"
+                max="1500"
+                step="50"
+                value={debounceDelay}
+                onChange={(e) => setDebounceDelay(Number(e.target.value))}
+                className="w-32 sm:w-40 accent-bw-black dark:accent-bw-white"
+              />
+            </div>
+            <span>{t('process.autoDelayLabel', { value: debounceDelay })}</span>
+          </div>
+        )}
+      </motion.div>
+    )
+
+    // InputEditor với Process Buttons - luôn đi kèm nhau
+    const inputEditorWithProcess = (
+      <div key="input-with-process" className="flex flex-col gap-3 sm:gap-4">
+        <DelayedSuspense fallback={<PreviewSkeleton />} delay={500}>
+          <InputEditor 
+            html={html}
+            setHtml={setHtml}
+            fileName={fileName}
+            setFileName={setFileName}
+            editorRef={editorRef}
+            darkMode={darkMode}
+            snapshots={snapshots}
+            setSnapshots={setSnapshots}
+            snapshotsSize={snapshotsSize}
+            onLoadUrl={async (url) => {
+              if (!url) return
+              try {
+                const response = await fetch(url)
+                if (!response.ok) {
+                  throw new Error('Failed to fetch')
+                }
+                const text = await response.text()
+                setHtml(text)
+                toast.success(t('toast.loadedFromUrl', { url }))
+              } catch (error) {
+                toast.error(t('toast.loadFromUrlError'))
+              }
+            }}
+            onLoadClipboard={async () => {
+              if (!navigator.clipboard || !navigator.clipboard.readText) {
+                toast.error(t('toast.clipboardUnsupported'))
+                return
+              }
+              try {
+                const text = await navigator.clipboard.readText()
+                if (!text) {
+                  toast.error(t('toast.clipboardEmpty'))
+                  return
+                }
+                setHtml(text)
+                toast.success(t('toast.loadedFromClipboard'))
+              } catch (error) {
+                toast.error(t('toast.clipboardReadError'))
+              }
+            }}
+          />
+        </DelayedSuspense>
+        {processButtons}
+      </div>
+    )
+
+    const outputEditor = (
+      <DelayedSuspense key="output" fallback={<PreviewSkeleton />} delay={500}>
+        <OutputEditor
+          outputHtml={outputHtml}
+          setOutputHtml={setOutputHtml}
+          fileName={fileName}
+          outputEditorRef={outputEditorRef}
+          darkMode={darkMode}
+          isProcessing={isProcessing}
+          readOnly={outputReadOnly}
+          onReadOnlyChange={setOutputReadOnly}
+          notRunYet={!hasProcessed && !isProcessing && !outputHtml}
+        />
+      </DelayedSuspense>
+    )
+
+    const preview = (
+      <DelayedSuspense key="preview" fallback={<PreviewSkeleton />} delay={500}>
+        <Preview
+          html={previewHtml}
+          reloadKey={previewNonce}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          customWidth={customWidth}
+          setCustomWidth={setCustomWidth}
+          customHeight={customHeight}
+          setCustomHeight={setCustomHeight}
+          onLoad={handlePreviewLoad}
+          showPreview={showPreview}
+          darkMode={darkMode}
+          blockNetwork={blockNetwork}
+          setBlockNetwork={setBlockNetwork}
+          notRunYet={!hasProcessed && !isProcessing && !outputHtml}
+        />
+      </DelayedSuspense>
+    )
+
+    switch (effectiveLayoutMode) {
+      case 'horizontal':
+        return (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+              {inputEditorWithProcess}
+              {outputEditor}
+            </div>
+            {preview}
+          </>
+        )
+      case 'vertical-split':
+        return (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+              <div className="flex flex-col gap-3 sm:gap-4">
+                {inputEditorWithProcess}
+                {outputEditor}
+              </div>
+              <div className="flex flex-col gap-3 sm:gap-4">
+                {preview}
+              </div>
+            </div>
+          </>
+        )
+      case 'grid':
+        return (
+          <>
+            {inputEditorWithProcess}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+              {outputEditor}
+              {preview}
+            </div>
+          </>
+        )
+      case 'custom':
+        // Render theo thứ tự đã lưu trong customLayoutOrder (grid 2D: sort by row then col)
+        const sortedItems = customLayoutOrder
+          .sort((a, b) => {
+            // Support both old format (order) and new format (row/col)
+            if (a.row !== undefined && b.row !== undefined) {
+              // New format: sort by row first, then col
+              if (a.row !== b.row) return a.row - b.row
+              return a.col - b.col
+            } else {
+              // Old format: sort by order
+              return (a.order || 0) - (b.order || 0)
+            }
+          })
+        
+        // Find max dimensions for grid
+        const maxRow = Math.max(...sortedItems.map(item => (item.row || 0) + (item.rowspan || 1) - 1), 0)
+        const maxCol = Math.max(...sortedItems.map(item => (item.col || 0) + (item.colspan || 1) - 1), 0)
+        const gridRows = maxRow + 1
+        const gridCols = Math.max(maxCol + 1, 3)
+        
+        const orderedComponents = sortedItems.map(item => {
+          const rowspan = item.rowspan || 1
+          const colspan = item.colspan || 1
+          const row = item.row !== undefined ? item.row : 0
+          const col = item.col !== undefined ? item.col : 0
+          
+          let component = null
+          switch (item.id) {
+            case 'input':
+              component = inputEditorWithProcess
+              break
+            case 'output':
+              component = outputEditor
+              break
+            case 'preview':
+              component = preview
+              break
+            default:
+              return null
+          }
+          
+          if (!component) return null
+          
+          return (
+            <div
+              key={item.id}
+              style={{
+                gridRow: `span ${rowspan}`,
+                gridColumn: `span ${colspan}`
+              }}
+            >
+              {component}
+            </div>
+          )
+        }).filter(Boolean)
+        
+        return (
+          <div 
+            className="grid gap-3 sm:gap-4"
+            style={{
+              gridTemplateRows: `repeat(${gridRows}, minmax(0, 1fr))`,
+              gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`
+            }}
+          >
+            {orderedComponents}
+          </div>
+        )
+      default: // 'default'
+        return (
+          <>
+            {inputEditorWithProcess}
+            {outputEditor}
+            {preview}
+          </>
+        )
+    }
+  }
+
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -338,6 +704,12 @@ function App() {
     }
   }
 
+  if (showErrorTest) {
+    return (
+      <ErrorTestPage onBack={() => setShowErrorTest(false)} />
+    )
+  }
+
   return (
     <motion.div 
       className="min-h-screen flex flex-col bg-bw-white dark:bg-bw-gray-1"
@@ -346,156 +718,49 @@ function App() {
       variants={containerVariants}
     >
       <Suspense fallback={<div className="h-16 bg-bw-black"></div>}>
-        <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+        <Header 
+          darkMode={darkMode} 
+          toggleDarkMode={toggleDarkMode}
+          onShowErrorTest={() => setShowErrorTest(true)}
+          onLanguageChange={handleLanguageChange}
+          layoutMode={layoutMode}
+          onLayoutChange={handleLayoutChange}
+          onEditCustomLayout={() => setIsCustomLayoutEditorOpen(true)}
+        />
       </Suspense>
       
       <motion.div 
         className="flex flex-col flex-1 gap-3 sm:gap-4 p-2 sm:p-4"
         variants={containerVariants}
       >
-        <DelayedSuspense fallback={<PreviewSkeleton />} delay={500}>
-          <InputEditor 
-          html={html}
-          setHtml={setHtml}
-          fileName={fileName}
-          setFileName={setFileName}
-          editorRef={editorRef}
-          darkMode={darkMode}
-          snapshots={snapshots}
-          setSnapshots={setSnapshots}
-          snapshotsSize={snapshotsSize}
-          onLoadUrl={async (url) => {
-            if (!url) return
-            try {
-              const response = await fetch(url)
-              if (!response.ok) {
-                throw new Error('Failed to fetch')
-              }
-              const text = await response.text()
-              setHtml(text)
-              toast.success(t('toast.loadedFromUrl', { url }))
-            } catch (error) {
-              toast.error(t('toast.loadFromUrlError'))
-            }
-          }}
-          onLoadClipboard={async () => {
-            if (!navigator.clipboard || !navigator.clipboard.readText) {
-              toast.error(t('toast.clipboardUnsupported'))
-              return
-            }
-            try {
-              const text = await navigator.clipboard.readText()
-              if (!text) {
-                toast.error(t('toast.clipboardEmpty'))
-                return
-              }
-              setHtml(text)
-              toast.success(t('toast.loadedFromClipboard'))
-            } catch (error) {
-              toast.error(t('toast.clipboardReadError'))
-            }
-          }}
-        />
-        </DelayedSuspense>
-
-        <motion.div
-          className="flex flex-col lg:flex-row items-center justify-center gap-2 sm:gap-4 py-2 sm:py-4"
-          variants={itemVariants}
-        >
-          <motion.button
-            className="px-4 sm:px-6 py-2 sm:py-3 bg-bw-black text-bw-white border border-bw-black rounded-sm cursor-pointer text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handleProcess}
-            disabled={isProcessing || !html || html.trim() === ''}
-            whileHover={!isProcessing && html && html.trim() !== '' ? { backgroundColor: '#333333', borderColor: '#333333' } : {}}
-            whileTap={!isProcessing && html && html.trim() !== '' ? { scale: 0.95 } : {}}
-            transition={{ duration: 0.2 }}
-          >
-            <Suspense fallback={<div className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}>
-              {isProcessing ? (
-                <LoaderIcon size={14} strokeWidth={2.5} className="sm:w-4 sm:h-4 animate-spin" />
-              ) : (
-                <PlayIcon size={14} strokeWidth={2} className="sm:w-4 sm:h-4" />
-              )}
-            </Suspense>
-            {isProcessing ? t('process.buttonProcessing') : t('process.button')}
-          </motion.button>
-          <div className="group flex flex-col items-center gap-1">
-            <motion.button
-              className={`flex items-center gap-2 px-3 sm:px-4 py-2 border rounded-sm text-xs sm:text-sm font-medium transition-colors ${
-                autoPreview
-                  ? 'bg-bw-black text-bw-white border-bw-black'
-                  : 'bg-bw-white text-bw-black border-bw-gray-d dark:bg-bw-gray-3 dark:text-bw-white dark:border-bw-gray-3'
-              }`}
-              onClick={() => setAutoPreview((prev) => !prev)}
-              whileTap={{ scale: 0.96 }}
-            >
-              <span className="relative inline-flex w-8 h-4 rounded-full border border-current transition-colors">
-                <span
-                  className={`absolute top-[2px] w-3 h-3 rounded-full bg-current transition-transform ${
-                    autoPreview ? 'translate-x-[20px]' : 'translate-x-0'
-                  }`}
-                />
-              </span>
-              <span>{t('process.autoToggle')}</span>
-            </motion.button>
-            <span className="text-[10px] uppercase tracking-wide text-bw-gray-6 dark:text-bw-gray-5 opacity-0 group-hover:opacity-100 transition-opacity">
-              {autoPreview ? t('process.autoOn') : t('process.autoOff')}
-            </span>
-          </div>
-          {autoPreview && (
-            <div className="flex flex-col items-center gap-1 text-[10px] sm:text-xs text-bw-gray-7 dark:text-bw-gray-7">
-              <div className="flex items-center gap-2">
-                <Suspense fallback={<div className="w-3 h-3" />}>
-                  <SlidersIcon size={12} className="text-bw-gray-6 dark:text-bw-gray-5" />
-                </Suspense>
-                <input
-                  type="range"
-                  min="300"
-                  max="1500"
-                  step="50"
-                  value={debounceDelay}
-                  onChange={(e) => setDebounceDelay(Number(e.target.value))}
-                  className="w-32 sm:w-40 accent-bw-black dark:accent-bw-white"
-                />
-              </div>
-              <span>{t('process.autoDelayLabel', { value: debounceDelay })}</span>
-            </div>
-          )}
-        </motion.div>
-        
-        <DelayedSuspense fallback={<PreviewSkeleton />} delay={500}>
-          <OutputEditor
-            outputHtml={outputHtml}
-            setOutputHtml={setOutputHtml}
-            fileName={fileName}
-            outputEditorRef={outputEditorRef}
-            darkMode={darkMode}
-            isProcessing={isProcessing}
-            readOnly={outputReadOnly}
-            onReadOnlyChange={setOutputReadOnly}
-            notRunYet={!hasProcessed && !isProcessing && !outputHtml}
-          />
-        </DelayedSuspense>
-
-        <DelayedSuspense fallback={<PreviewSkeleton />} delay={500}>
-          <Preview
-            html={previewHtml}
-            reloadKey={previewNonce}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            customWidth={customWidth}
-            setCustomWidth={setCustomWidth}
-            customHeight={customHeight}
-            setCustomHeight={setCustomHeight}
-            onLoad={handlePreviewLoad}
-            showPreview={showPreview}
-            darkMode={darkMode}
-            blockNetwork={blockNetwork}
-            setBlockNetwork={setBlockNetwork}
-            notRunYet={!hasProcessed && !isProcessing && !outputHtml}
-          />
-        </DelayedSuspense>
+        {renderLayoutContent()}
       </motion.div>
+      
+      {/* Footer */}
+      <Suspense fallback={<div className="h-16 bg-bw-black"></div>}>
+        <Footer />
+      </Suspense>
+      
+      {/* Dark Mode Transition Overlay */}
+      <DarkModeTransition 
+        isTransitioning={isTransitioning} 
+        newDarkMode={!darkMode}
+      />
+      
+      {/* Language Transition Overlay */}
+      <LanguageTransition 
+        isTransitioning={isLanguageTransitioning} 
+        newLanguageCode={newLanguageCode}
+        availableLanguages={availableLanguages}
+      />
+
+      {/* Custom Layout Editor */}
+      <CustomLayoutEditor
+        isOpen={isCustomLayoutEditorOpen}
+        onClose={() => setIsCustomLayoutEditorOpen(false)}
+        onSave={handleCustomLayoutSave}
+        currentLayout={customLayoutOrder}
+      />
     </motion.div>
   )
 }
