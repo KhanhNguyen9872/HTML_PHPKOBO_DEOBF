@@ -117,6 +117,7 @@ export default {
     'toast.loadedFromUrlWebsite': 'HTML situs web berhasil dimuat',
     'toast.loadFromUrlError': 'Gagal memuat URL. Mungkin karena CORS atau URL tidak valid.',
     'toast.urlEmpty': 'URL tidak boleh kosong',
+    'toast.unsupportedScheme': 'Hanya URL http:// dan https:// yang didukung. Skema yang Anda berikan ({scheme}) tidak didukung.',
     'toast.loadedFromClipboard': 'Ditempel dari clipboard',
     'toast.clipboardUnsupported': 'Clipboard API tidak didukung oleh browser ini',
     'toast.clipboardEmpty': 'Clipboard kosong',

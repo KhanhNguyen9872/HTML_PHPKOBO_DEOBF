@@ -115,6 +115,7 @@ export default {
   'toast.loadedFromUrlWebsite': 'Đã tải HTML từ website thành công',
   'toast.loadFromUrlError': 'Không thể tải URL. Có thể do CORS hoặc URL không hợp lệ.',
   'toast.urlEmpty': 'URL không được để trống',
+  'toast.unsupportedScheme': 'Chỉ hỗ trợ URL http:// và https://. Scheme bạn cung cấp ({scheme}) không được hỗ trợ.',
   'toast.loadedFromClipboard': 'Đã dán HTML từ clipboard',
   'toast.clipboardUnsupported': 'Trình duyệt không hỗ trợ đọc clipboard',
   'toast.clipboardEmpty': 'Clipboard không có nội dung văn bản',

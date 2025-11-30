@@ -117,6 +117,7 @@ export default {
     'toast.loadedFromUrlWebsite': 'Matagumpay na na-load ang HTML ng website',
     'toast.loadFromUrlError': 'Nabigong i-load ang URL. Maaaring dahil sa CORS o hindi wastong URL.',
     'toast.urlEmpty': 'Hindi maaaring walang laman ang URL',
+    'toast.unsupportedScheme': 'Tanging http:// at https:// URL ang sinusuportahan. Ang scheme na ibinigay mo ({scheme}) ay hindi sinusuportahan.',
     'toast.loadedFromClipboard': 'Na-paste ang HTML mula sa clipboard',
     'toast.clipboardUnsupported': 'Hindi suportado ang Clipboard API sa browser na ito',
     'toast.clipboardEmpty': 'Walang laman ang clipboard',

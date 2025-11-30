@@ -117,6 +117,7 @@ export default {
     'toast.loadedFromUrlWebsite': 'โหลด HTML จากเว็บไซต์สำเร็จ',
     'toast.loadFromUrlError': 'ไม่สามารถโหลด URL ได้ อาจเกิดจาก CORS หรือ URL ไม่ถูกต้อง',
     'toast.urlEmpty': 'URL ไม่สามารถว่างได้',
+    'toast.unsupportedScheme': 'รองรับเฉพาะ URL http:// และ https:// เท่านั้น Scheme ที่คุณระบุ ({scheme}) ไม่ได้รับการรองรับ',
     'toast.loadedFromClipboard': 'วาง HTML จากคลิปบอร์ดแล้ว',
     'toast.clipboardUnsupported': 'API คลิปบอร์ดไม่สามารถใช้งานได้ในเบราว์เซอร์นี้',
     'toast.clipboardEmpty': 'คลิปบอร์ดว่าง',

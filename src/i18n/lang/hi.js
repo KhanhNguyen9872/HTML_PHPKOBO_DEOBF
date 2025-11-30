@@ -117,6 +117,7 @@ export default {
     'toast.loadedFromUrlWebsite': 'वेबसाइट HTML सफलतापूर्वक लोड किया गया',
     'toast.loadFromUrlError': 'URL लोड करने में विफल। CORS या अमान्य URL के कारण हो सकता है।',
     'toast.urlEmpty': 'URL खाली नहीं हो सकता',
+    'toast.unsupportedScheme': 'केवल http:// और https:// URL समर्थित हैं। आपके द्वारा प्रदान किया गया स्कीम ({scheme}) समर्थित नहीं है।',
     'toast.loadedFromClipboard': 'क्लिपबोर्ड से HTML पेस्ट किया गया',
     'toast.clipboardUnsupported': 'इस ब्राउज़र में क्लिपबोर्ड API उपलब्ध नहीं है',
     'toast.clipboardEmpty': 'क्लिपबोर्ड खाली है',

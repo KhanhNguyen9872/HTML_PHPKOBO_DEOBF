@@ -256,12 +256,30 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
   }, [])
 
   const handleUrlSubmit = useCallback(async () => {
-    const url = urlInput.trim()
+    let url = urlInput.trim()
     if (!url) {
       toast.error(t('toast.urlEmpty'), {
         icon: <AlertCircle size={18} strokeWidth={2} />
       })
       return
+    }
+
+    // Kiểm tra và xử lý scheme
+    const schemePattern = /^([a-zA-Z][a-zA-Z0-9+.-]*):\/\//
+    const schemeMatch = url.match(schemePattern)
+    
+    if (schemeMatch) {
+      const scheme = schemeMatch[1].toLowerCase()
+      // Kiểm tra nếu scheme không phải http hoặc https
+      if (scheme !== 'http' && scheme !== 'https') {
+        toast.error(t('toast.unsupportedScheme', { scheme: `${scheme}://` }), {
+          icon: <AlertCircle size={18} strokeWidth={2} />
+        })
+        return
+      }
+    } else {
+      // Không có scheme, tự động thêm https://
+      url = `https://${url}`
     }
 
     setIsUrlOverlayOpen(false)
@@ -954,12 +972,6 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setIsUrlOverlayOpen(false)
-                setUrlInput('')
-              }
-            }}
           >
             <motion.div
               className="bg-bw-white dark:bg-bw-gray-2 border border-bw-gray-d dark:border-bw-gray-3 rounded-md shadow-xl p-4 sm:p-6 w-full max-w-md mx-4"

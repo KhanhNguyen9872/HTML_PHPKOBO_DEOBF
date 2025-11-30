@@ -117,6 +117,7 @@ export default {
     'toast.loadedFromUrlWebsite': 'ウェブサイトのHTMLの読み込みに成功しました',
     'toast.loadFromUrlError': 'URLを読み込めませんでした。CORSまたは無効なURLが原因の可能性があります。',
     'toast.urlEmpty': 'URLを空にすることはできません',
+    'toast.unsupportedScheme': 'http://とhttps://のURLのみサポートされています。提供されたスキーム（{scheme}）はサポートされていません。',
     'toast.loadedFromClipboard': 'クリップボードからHTMLを読み込みました',
     'toast.clipboardUnsupported': 'このブラウザはクリップボードAPIをサポートしていません',
     'toast.clipboardEmpty': 'クリップボードは空です',

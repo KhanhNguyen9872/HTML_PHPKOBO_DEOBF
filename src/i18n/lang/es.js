@@ -117,6 +117,7 @@ export default {
     'toast.loadedFromUrlWebsite': 'HTML del sitio web cargado con éxito',
     'toast.loadFromUrlError': 'No se pudo cargar la URL. Puede deberse a CORS o URL inválida.',
     'toast.urlEmpty': 'La URL no puede estar vacía',
+    'toast.unsupportedScheme': 'Solo se admiten URLs http:// y https://. El esquema proporcionado ({scheme}) no es compatible.',
     'toast.loadedFromClipboard': 'HTML pegado desde el portapapeles',
     'toast.clipboardUnsupported': 'La API del portapapeles no está disponible en este navegador',
     'toast.clipboardEmpty': 'El portapapeles está vacío',

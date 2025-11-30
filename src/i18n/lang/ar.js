@@ -117,6 +117,7 @@ export default {
     'toast.loadedFromUrlWebsite': 'تم تحميل HTML من موقع الويب بنجاح',
     'toast.loadFromUrlError': 'فشل تحميل الرابط. قد يكون بسبب CORS أو رابط غير صالح.',
     'toast.urlEmpty': 'لا يمكن أن يكون الرابط فارغاً',
+    'toast.unsupportedScheme': 'يتم دعم روابط http:// و https:// فقط. المخطط الذي قدمته ({scheme}) غير مدعوم.',
     'toast.loadedFromClipboard': 'تم اللصق من الحافظة',
     'toast.clipboardUnsupported': 'واجهة الحافظة غير مدعومة في هذا المتصفح',
     'toast.clipboardEmpty': 'الحافظة فارغة',

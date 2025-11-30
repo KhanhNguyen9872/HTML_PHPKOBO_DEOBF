@@ -117,6 +117,7 @@ export default {
     'toast.loadedFromUrlWebsite': '网站 HTML 加载成功',
     'toast.loadFromUrlError': '无法加载 URL。可能是由于 CORS 或无效的 URL。',
     'toast.urlEmpty': 'URL 不能为空',
+    'toast.unsupportedScheme': '仅支持 http:// 和 https:// URL。您提供的方案 ({scheme}) 不受支持。',
     'toast.loadedFromClipboard': '已从剪贴板读取 HTML',
     'toast.clipboardUnsupported': '此浏览器不支持剪贴板 API',
     'toast.clipboardEmpty': '剪贴板为空',

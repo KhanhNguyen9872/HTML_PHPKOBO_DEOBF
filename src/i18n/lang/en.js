@@ -115,6 +115,7 @@ export default {
   'toast.loadedFromUrlWebsite': 'Website HTML loaded successfully',
   'toast.loadFromUrlError': 'Failed to load URL. May be due to CORS or invalid URL.',
   'toast.urlEmpty': 'URL cannot be empty',
+  'toast.unsupportedScheme': 'Only http:// and https:// URLs are supported. Your provided scheme ({scheme}) is not supported.',
   'toast.loadedFromClipboard': 'Pasted HTML from clipboard',
   'toast.clipboardUnsupported': 'Clipboard API is not available in this browser',
   'toast.clipboardEmpty': 'Clipboard is empty',
