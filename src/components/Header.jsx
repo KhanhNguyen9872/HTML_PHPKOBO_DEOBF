@@ -232,7 +232,7 @@ export default function Header({ darkMode, toggleDarkMode, onShowErrorTest, onLa
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
-          {darkMode ? <Sun size={18} strokeWidth={2} className="sm:w-5 sm:h-5" /> : <Moon size={18} strokeWidth={2} className="sm:w-5 sm:h-5" />}
+          {darkMode ? <Moon size={18} strokeWidth={2} className="sm:w-5 sm:h-5" /> : <Sun size={18} strokeWidth={2} className="sm:w-5 sm:h-5" />}
         </motion.button>
       </motion.div>
     </motion.header>

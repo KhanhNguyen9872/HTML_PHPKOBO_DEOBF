@@ -2,8 +2,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Moon, Sun } from 'react-feather'
 
 export default function DarkModeTransition({ isTransitioning, newDarkMode }) {
-  // Hiển thị icon của mode MỚI (không phải mode cũ)
-  const iconToShow = newDarkMode ? 'moon' : 'sun'
+  // Hiển thị icon của mode HIỆN TẠI (trước khi chuyển)
+  const iconToShow = newDarkMode ? 'sun' : 'moon'
 
   return (
     <AnimatePresence>
