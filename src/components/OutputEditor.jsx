@@ -6,7 +6,7 @@ import { Download, Copy, Trash2, Code, RefreshCw, MoreHorizontal, Maximize2, Min
 import { useI18n } from '../i18n/I18nContext'
 import { html_beautify, css_beautify, js_beautify } from 'js-beautify'
 
-export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outputEditorRef, darkMode, isProcessing, readOnly = true, onReadOnlyChange, notRunYet = false }) {
+export default function OutputEditor({ outputHtml, setOutputHtml, outputEditorRef, darkMode, isProcessing, readOnly = true, onReadOnlyChange, notRunYet = false, downloadFileName = 'output_deobf.html' }) {
   const { t } = useI18n()
   const [outputCopySuccess, setOutputCopySuccess] = useState(false)
   const [hoveredButton, setHoveredButton] = useState(null)
@@ -22,20 +22,18 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
   const compactMenuRef = useRef(null)
   const pendingOutputRef = useRef(outputHtml)
   const outputUpdateTimerRef = useRef(null)
+  const displayFileName = useMemo(() => downloadFileName || 'output_deobf.html', [downloadFileName])
 
   const handleOutputDownload = useCallback(() => {
     const blob = new Blob([outputHtml], { type: 'text/html' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    const baseName = fileName
-      ? fileName.replace(/\.[^/.]+$/, '')
-      : 'output'
-    a.download = `${baseName}_deobf.html`
+    a.download = displayFileName
     a.click()
     URL.revokeObjectURL(url)
-    toast.success(t('toast.downloaded', { name: `${baseName}_deobf.html` }))
-  }, [outputHtml, fileName, t])
+    toast.success(t('toast.downloaded', { name: displayFileName }))
+  }, [outputHtml, displayFileName, t])
 
   const handleOutputCopy = useCallback(async () => {
     try {
@@ -432,7 +430,12 @@ export default function OutputEditor({ outputHtml, setOutputHtml, fileName, outp
         </motion.div>
       )}
       <div className="px-3 sm:px-5 py-2 sm:py-3 bg-bw-gray-f dark:bg-bw-gray-3 border-b border-bw-gray-d dark:border-bw-gray-3 text-xs sm:text-sm font-medium text-bw-black dark:text-bw-white flex justify-between items-center flex-wrap gap-2">
-        <span className="font-bold tracking-wide">{t('output.title')}</span>
+        <div className="flex flex-col gap-0.5">
+          <span className="font-bold tracking-wide">{t('output.title')}</span>
+          <span className="text-[10px] sm:text-xs text-bw-gray-7 dark:text-bw-gray-6 truncate max-w-[200px] sm:max-w-[260px]" title={displayFileName}>
+            {displayFileName}
+          </span>
+        </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <label
             className="flex items-center gap-1 sm:gap-1.5 px-2 py-1.5 bg-bw-white dark:bg-bw-gray-3 border border-bw-gray-d dark:border-bw-gray-3 rounded-sm text-xs sm:text-sm font-medium cursor-pointer select-none"

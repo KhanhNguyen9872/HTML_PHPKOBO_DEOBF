@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { RefreshCw } from 'react-feather'
@@ -58,9 +58,27 @@ function App() {
   const initialCustomSize = loadStoredCustomSize()
   const [customWidth, setCustomWidth] = useState(initialCustomSize.width)
   const [customHeight, setCustomHeight] = useState(initialCustomSize.height)
-  const [fileName, setFileName] = useState(null)
+  const [fileName, setFileName] = useState(() => {
+    // Khôi phục tên file từ snapshot mới nhất (nếu có)
+    try {
+      if (typeof window === 'undefined') return null
+      const saved = localStorage.getItem('html-snapshots')
+      if (!saved) return null
+      const parsed = JSON.parse(saved)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const latest = parsed[0]
+        if (latest && typeof latest.fileName === 'string' && latest.fileName.trim()) {
+          return latest.fileName.trim()
+        }
+      }
+      return null
+    } catch {
+      return null
+    }
+  })
   const [showPreview, setShowPreview] = useState(false)
   const [outputHtml, setOutputHtml] = useState('')
+  const [outputFileNameDisplay, setOutputFileNameDisplay] = useState('output_deobf.html')
   const [previewHtml, setPreviewHtml] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [isAutoProcessing, setIsAutoProcessing] = useState(false)
@@ -106,7 +124,7 @@ function App() {
     const saved = localStorage.getItem('auto-preview-delay')
     const parsed = saved ? parseInt(saved, 10) : 500
     if (Number.isNaN(parsed)) return 500
-    return Math.min(1500, Math.max(300, parsed))
+    return Math.min(5000, Math.max(300, parsed))
   })
   const [snapshots, setSnapshots] = useState(() => {
     try {
@@ -267,6 +285,8 @@ function App() {
     }
   }, [])
 
+  const defaultInputFileName = useMemo(() => fileName || 'input.html', [fileName])
+
   const saveSnapshot = useCallback((content) => {
     const trimmed = (content || '').trim()
     if (!trimmed) return
@@ -275,12 +295,23 @@ function App() {
         return prev
       }
       const next = [
-        { id: Date.now(), content, timestamp: new Date().toISOString() },
+        { id: Date.now(), content, timestamp: new Date().toISOString(), fileName: defaultInputFileName },
         ...prev
       ]
       return next.slice(0, SNAPSHOT_LIMIT)
     })
-  }, [])
+  }, [defaultInputFileName])
+
+  const deriveBaseFileName = useCallback(() => {
+    if (fileName && typeof fileName === 'string') {
+      const trimmed = fileName.trim()
+      if (trimmed) {
+        const withoutExt = trimmed.replace(/\.[^/.]+$/, '')
+        return withoutExt || 'output'
+      }
+    }
+    return 'output'
+  }, [fileName])
 
   const triggerPreview = useCallback(({ showToast = false, isAuto = false } = {}) => {
     if (!html || html.trim() === '') {
@@ -289,6 +320,9 @@ function App() {
       }
       return false
     }
+
+    const nextBase = deriveBaseFileName()
+    setOutputFileNameDisplay(`${nextBase}_deobf.html`)
 
     setIsAutoProcessing(isAuto)
     setPreviewHtml(html)
@@ -305,7 +339,7 @@ function App() {
       })
     }
     return true
-  }, [html, t, saveSnapshot])
+  }, [html, t, saveSnapshot, deriveBaseFileName])
 
   const handleProcess = useCallback(() => {
     triggerPreview({ showToast: true, isAuto: false })
@@ -452,7 +486,7 @@ function App() {
             </span>
             <span>{t('process.autoToggle')}</span>
           </motion.button>
-          <span className="text-[10px] uppercase tracking-wide text-bw-gray-6 dark:text-bw-gray-5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-[10px] uppercase tracking-wide text-bw-gray-6 dark:text-bw-gray-5">
             {autoPreview ? t('process.autoOn') : t('process.autoOff')}
           </span>
         </div>
@@ -465,7 +499,7 @@ function App() {
               <input
                 type="range"
                 min="300"
-                max="1500"
+                max="5000"
                 step="50"
                 value={debounceDelay}
                 onChange={(e) => setDebounceDelay(Number(e.target.value))}
@@ -534,13 +568,13 @@ function App() {
         <OutputEditor
           outputHtml={outputHtml}
           setOutputHtml={setOutputHtml}
-          fileName={fileName}
           outputEditorRef={outputEditorRef}
           darkMode={darkMode}
           isProcessing={isProcessing}
           readOnly={outputReadOnly}
           onReadOnlyChange={setOutputReadOnly}
           notRunYet={!hasProcessed && !isProcessing && !outputHtml}
+          downloadFileName={outputFileNameDisplay}
         />
       </DelayedSuspense>
     )
@@ -562,6 +596,7 @@ function App() {
           blockNetwork={blockNetwork}
           setBlockNetwork={setBlockNetwork}
           notRunYet={!hasProcessed && !isProcessing && !outputHtml}
+          fileName={outputFileNameDisplay}
         />
       </DelayedSuspense>
     )

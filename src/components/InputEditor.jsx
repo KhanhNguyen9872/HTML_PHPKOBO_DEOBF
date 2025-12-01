@@ -8,6 +8,22 @@ import { Upload, Download, Copy, Trash2, Code, AlertCircle, CheckCircle, X, Cloc
 import { useI18n } from '../i18n/I18nContext'
 import { html_beautify, css_beautify, js_beautify } from 'js-beautify'
 
+const deriveRouteBasedFileName = (targetUrl) => {
+  try {
+    const { pathname } = new URL(targetUrl)
+    if (!pathname || pathname === '/' || pathname.trim() === '') {
+      return 'index.html'
+    }
+    const segments = pathname.split('/').filter(Boolean)
+    let lastSegment = segments.pop() || 'index'
+    lastSegment = lastSegment.replace(/(\.php|\.html)$/i, '')
+    lastSegment = lastSegment.replace(/[^a-zA-Z0-9-_]/g, '_') || 'index'
+    return `${lastSegment}.html`
+  } catch {
+    return 'index.html'
+  }
+}
+
 export default function InputEditor({ html, setHtml, fileName, setFileName, editorRef, darkMode, snapshots = [], setSnapshots, snapshotsSize = 0, onLoadUrl, onLoadClipboard }) {
   const { t } = useI18n()
   const [isLoading, setIsLoading] = useState(false)
@@ -298,7 +314,7 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
           icon: <CheckCircle size={18} strokeWidth={2} />
         })
       } else {
-        setFileName(null)
+        setFileName(deriveRouteBasedFileName(url))
         toast.success(t('toast.loadedFromUrlWebsite'), {
           icon: <CheckCircle size={18} strokeWidth={2} />
         })
@@ -397,14 +413,35 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
   const handleSnapshotSelect = useCallback((snapshot) => {
     if (!snapshot) return
     setHtml(snapshot.content || '')
+    if (setFileName) {
+      setFileName(snapshot.fileName || null)
+    }
     toast.success(t('toast.snapshotRestored'))
     setHistoryDropdownOpen(false)
-  }, [setHtml, t])
+  }, [setHtml, setFileName, t])
 
   const handleSnapshotDelete = useCallback((id) => {
     if (!setSnapshots) return
     setSnapshots((prev) => prev.filter((item) => item.id !== id))
   }, [setSnapshots])
+
+  const handleSnapshotClearAll = useCallback(() => {
+    if (!setSnapshots) return
+    toast(t('toast.clearConfirm'), {
+      action: {
+        label: t('toast.clear'),
+        onClick: () => {
+          setSnapshots([])
+          toast.success('History cleared')
+        }
+      },
+      cancel: {
+        label: t('toast.cancel'),
+        onClick: () => {}
+      },
+      duration: 5000,
+    })
+  }, [setSnapshots, t])
 
   const formatSnapshotTime = useCallback((value) => {
     try {
@@ -774,8 +811,8 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
                             className="flex-1 text-left min-w-0"
                             onClick={() => handleSnapshotSelect(snapshot)}
                           >
-                            <p className="text-[11px] font-semibold text-bw-black dark:text-bw-white">
-                              {formatSnapshotTime(snapshot.timestamp)}
+                            <p className="text-[11px] font-semibold text-bw-black dark:text-bw-white truncate">
+                              {(snapshot.fileName || 'input.html') + ' - ' + formatSnapshotTime(snapshot.timestamp)}
                             </p>
                             <p className="text-[10px] text-bw-gray-7 dark:text-bw-gray-6 truncate">
                               {(snapshot.content || '').replace(/\s+/g, ' ').slice(0, 160)}
@@ -794,11 +831,21 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
                         </div>
                       )}
                     />
+                    {snapshots.length > 0 && (
+                      <div className="flex items-center justify-end gap-2 px-4 py-2 bg-bw-gray-f/80 dark:bg-bw-gray-3/80 border-t border-bw-gray-d dark:border-bw-gray-3">
+                        <button
+                          className="text-[11px] sm:text-xs font-medium text-bw-danger-500 hover:text-bw-danger-600 dark:text-bw-danger-200 dark:hover:text-bw-danger-100 underline-offset-2 hover:underline disabled:opacity-50"
+                          onClick={handleSnapshotClearAll}
+                        >
+                          Clear all history
+                        </button>
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
         <span className={`text-[10px] text-bw-gray-6 dark:text-bw-gray-5 ${isCompactToolbar ? 'self-end' : 'whitespace-nowrap'}`}>
-                {t('input.historySize', { value: formatSnapshotSize(snapshotsSize) })}
+                {formatSnapshotSize(snapshotsSize)}
               </span>
             </div>
             </div>
@@ -854,7 +901,12 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
         </div>
       )}
       <div className="px-3 sm:px-5 py-2 sm:py-3 bg-bw-gray-f dark:bg-bw-gray-3 border-b border-bw-gray-d dark:border-bw-gray-3 text-xs sm:text-sm font-medium text-bw-black dark:text-bw-white flex justify-between items-center flex-wrap gap-2">
-        <span className="font-bold tracking-wide">{t('input.title')}</span>
+        <div className="flex flex-col gap-0.5">
+          <span className="font-bold tracking-wide">{t('input.title')}</span>
+          <span className="text-[10px] sm:text-xs text-bw-gray-7 dark:text-bw-gray-6 truncate max-w-[200px] sm:max-w-[260px]" title={fileName || 'input.html'}>
+            {fileName || 'input.html'}
+          </span>
+        </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <AnimatePresence mode="wait">
             {isLoading && (
@@ -880,19 +932,6 @@ export default function InputEditor({ html, setHtml, fileName, setFileName, edit
               >
                 <RefreshCw size={12} className="animate-spin" />
                 {t('input.exampleLoading')}
-              </motion.span>
-            )}
-            {fileName && !isLoading && (
-              <motion.span 
-                key="filename"
-                className="text-xs text-bw-gray-7 font-light truncate max-w-[80px] sm:max-w-[150px]" 
-                title={fileName}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                {fileName}
               </motion.span>
             )}
           </AnimatePresence>

@@ -23,7 +23,8 @@ function Preview({
   darkMode,
   blockNetwork,
   setBlockNetwork,
-  notRunYet = false
+  notRunYet = false,
+  fileName = 'output_deobf.html'
 }) {
   const { t } = useI18n()
   const [hoveredButton, setHoveredButton] = useState(null)
@@ -110,7 +111,14 @@ function Preview({
       )}
           <div className="px-3 sm:px-5 py-2 sm:py-3 bg-bw-gray-f dark:bg-bw-gray-3 border-b border-bw-gray-d dark:border-bw-gray-3 text-xs sm:text-sm font-medium text-bw-black dark:text-bw-gray-d flex flex-col gap-2">
             <div className="flex justify-between items-center flex-wrap gap-2">
-            <span className="font-bold tracking-wide">{t('preview.title')}</span>
+            <div className="flex flex-col gap-0.5">
+              <span className="font-bold tracking-wide">{t('preview.title')}</span>
+              {fileName && (
+                <span className="text-[10px] sm:text-xs text-bw-gray-7 dark:text-bw-gray-6 truncate max-w-[200px] sm:max-w-[260px]" title={fileName}>
+                  {fileName}
+                </span>
+              )}
+            </div>
               <motion.div 
                 className="flex gap-1 sm:gap-2"
                 initial={{ opacity: 0 }}
