@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
-    "axios": "^1.13.2",
+    "axios": "^1.13.5",
     "framer-motion": "^10.16.16",
     "js-beautify": "^1.15.4",
     "monaco-editor": "^0.55.1",
