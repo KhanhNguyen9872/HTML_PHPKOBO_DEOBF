@@ -193,6 +193,6 @@ export default {
     'footer.resources.readme': 'README',
     'footer.contact.title': 'जानकारी',
     'footer.contact.version': 'संस्करण',
-    'footer.contact.license': 'MIT लाइसेंस',
+    'footer.contact.license': 'Apache-2.0 License',
   }
   

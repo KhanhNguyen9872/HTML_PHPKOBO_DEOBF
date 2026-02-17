@@ -193,6 +193,6 @@ export default {
     'footer.resources.readme': 'README',
     'footer.contact.title': '信息',
     'footer.contact.version': '版本',
-    'footer.contact.license': 'MIT许可证',
+    'footer.contact.license': 'Apache-2.0 License',
   }
   
